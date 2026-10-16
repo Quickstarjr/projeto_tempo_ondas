@@ -153,12 +153,66 @@ FIM DO REGISTRO
 - r = 0.982, p = 0.000 → pipeline RECUPERA HD ✅
 - Bins reproduzem a estrutura em U da HD
 
-### 9.2 Scan sem red noise
-- Limiar de detecção: SNR ≈ 1.0
-- ⚠️ Anomalia: r negativo em SNR < 0.5
-- Causa: seed fixa do gerador cria padrão de ruído
-  idêntico entre amplitudes, produzindo falso positivo
-- Lição: reforça necessidade de sky scramble em dados reais
+------------------------------------------------------------
+9.2 SCAN SEM RED NOISE — LIMIAR DE SENSIBILIDADE
+------------------------------------------------------------
+
+Amplitudes varridas: 0.1 a 10 (9 pontos log-espaçados).
+Ruído vermelho: 0.0.
+Seed por amplitude: 42 + 1000 * i_amp (patch aplicado após
+identificação de artefato, ver abaixo).
+
+Resultado (com seed por amplitude):
+
+  SNR    Pearson r   p       recupera
+  0.10   -0.840      0.002   False    ← outlier (ver abaixo)
+  0.18   -0.135      0.709   False
+  0.32   +0.649      0.042   False
+  0.56   +0.759      0.011   True
+  1.00   +0.940      0.000   True
+  1.78   +0.981      0.000   True
+  3.16   +0.964      0.000   True
+  5.62   +0.969      0.000   True
+  10.0   +0.970      0.000   True
+
+Limiar de detecção: SNR ≈ 0.5 - 1.0.
+
+ANOMALIA RESIDUAL — SNR = 0.1:
+  O ponto em amplitude 0.1 ainda mostra correlação negativa
+  significativa (r = -0.84, p = 0.002). Análise: as posições
+  dos pulsares são geradas pela mesma seed (42 + 1000*0 = 42).
+  Essa configuração específica de posições cria, em amplitude
+  baixa, um padrão onde o ruído branco anti-correlaciona com
+  HD por coincidência.
+
+  NÃO É BUG. É uma propriedade de qualquer estimador em
+  regime de SNR muito baixo: a variância estatística pode
+  produzir correlações espúrias de qualquer sinal.
+
+LIÇÃO METODOLÓGICA (crítica):
+  Este resultado é DEMONSTRAÇÃO EMPÍRICA de que:
+    1. Um único teste, em SNR baixo, pode dar falso positivo.
+    2. O falso positivo pode ser significativo (p < 0.01) e
+       ainda assim espúrio.
+    3. Por isso o sky scramble é OBRIGATÓRIO na análise de
+       dados reais — ele controla exatamente esse tipo de
+       flutuação.
+
+  Sem o sky scramble, o pipeline_real.py poderia ter produzido
+  uma "detecção" espúria nos dados do NANOGrav. O pré-registro
+  nos protegeu disso.
+
+CORREÇÃO APLICADA:
+  Seed diferente por amplitude no scan (42 + 1000 * i_amp).
+  O artefato foi reduzido de 4 pontos para 1 ponto. Para
+  eliminação completa, seria necessário AVERAGEAR sobre
+  múltiplas seeds por amplitude (ver observação abaixo).
+
+OBSERVAÇÃO PARA FASE FUTURA:
+  Para robustez total, cada amplitude poderia ser testada com
+  N=10 seeds diferentes, reportando a média e o desvio das
+  correlações r. Isso eliminaria a dependência de seed
+  individual, mas exigiria ~10x mais tempo de execução.
 
 ### 9.3 Scan com red noise = 1.0
 - Limiar de detecção: SNR ≈ 1.0

@@ -310,6 +310,9 @@ def teste_scan(
     """
     Varre amplitude do sinal HD e verifica em que ponto o pipeline
     começa a recuperá-lo. Isso dá o LIMIAR DE SENSIBILIDADE.
+
+    NOTA: usa seed diferente por amplitude para evitar artefato
+    de correlação espúria em SNR baixo (ver §9.2 do registro).
     """
     if amplitudes is None:
         amplitudes = np.logspace(-1, 1, 9)  # 0.1 a 10
@@ -322,13 +325,16 @@ def teste_scan(
     from scipy.stats import pearsonr
 
     resultados = []
-    for amp in amplitudes:
-   df, _, _ = gerar_dataset_hd(
-    n_pulsares=n_pulsares, n_bins=n_bins,
-    amplitude_sinal=amp, amplitude_ruido_branco=1.0,
-    amplitude_ruido_vermelho=ruido_vermelho,
-    seed=42 + int(amp * 1000),  # <-- seed diferente por amplitude
-)
+    for i_amp, amp in enumerate(amplitudes):
+        seed_amp = 42 + 1000 * i_amp
+        df, _, _ = gerar_dataset_hd(
+            n_pulsares=n_pulsares,
+            n_bins=n_bins,
+            amplitude_sinal=amp,
+            amplitude_ruido_branco=1.0,
+            amplitude_ruido_vermelho=ruido_vermelho,
+            seed=seed_amp,
+        )
         df = reamostrar(df)
         pares = calcular_pares(df)
         bins = binnar(pares)
@@ -338,7 +344,6 @@ def teste_scan(
         else:
             r, p = pearsonr(bins['corr_media'], bins['hd_medio'])
 
-        # SNR grosseiro: amplitude / ruído branco
         snr = amp / 1.0
         resultados.append({
             'amplitude': amp,
@@ -353,7 +358,6 @@ def teste_scan(
     df_res = pd.DataFrame(resultados)
     df_res.to_csv(Path(output_dir) / 'scan_hd.csv', index=False)
 
-    # Plot
     fig, ax = plt.subplots(figsize=(10, 6))
     ax.plot(df_res['snr'], df_res['pearson_r'], 'o-')
     ax.axhline(0.7, color='red', linestyle='--',
@@ -369,7 +373,6 @@ def teste_scan(
     plt.close()
     print(f"\n[+] Resultados: {output_dir}/scan_hd.csv")
     print(f"[+] Plot:       {output_dir}/scan_hd.png")
-
 
 # ============================================================
 # MAIN
