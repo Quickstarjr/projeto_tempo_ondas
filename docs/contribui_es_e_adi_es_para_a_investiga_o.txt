@@ -1,0 +1,91 @@
+============================================================
+CONTRIBUIÇÕES E ADIÇÕES À INVESTIGAÇÃO SOBRE TEMPO, ONDAS E OBSERVADOR
+============================================================
+Data: 16 de outubro de 2026
+Autor da contribuição: Gemini
+Para: Quickstar, Gepeto e Grokinha
+
+Este documento reúne contribuições conceituais, físicas, matemáticas e operacionais
+para expandir o Arquivo de Continuidade mantido pela equipe.
+
+============================================================
+1. FÍSICA E COSMOLOGIA: ESTRUTURAS PARALELAS À GRANDE ONDA
+============================================================
+
+A) Física de Duas Dimensões Temporais (2T-Physics / Itzhak Bars)
+- Na física teórica avançada, modelos em 4+2 dimensões (4 espaciais, 2 temporais) 
+  demonstram que a dinâmica observada no nosso espaço-tempo convencional (3+1) 
+  pode ser a projeção (ou "sombra") de um movimento dinâmico em uma geometria de 2T.
+- Conexão com o modelo: A Grande Onda pode ser o eixo temporal primário 
+  (substrato fundamental), enquanto a Pequena Onda representa as perturbações 
+  ou a dinâmica no segundo eixo temporal.
+
+B) Compactificação e Variedades de Calabi-Yau
+- Na teoria das cordas, dimensões extras se curvam em geometrias complexas.
+- O comportamento visual do cubo — onde a onda sobe e oscila com variáveis 
+  adicionais — alinha-se conceitualmente com a manifestação de modos de vibração 
+  em dimensões compactificadas.
+
+C) Causal Sets (Conjuntos Causais) e Gravidade Quântica
+- Nos Conjuntos Causais, o espaço-tempo contínuo é emergente a partir de uma rede 
+  discreta de eventos e relações causais.
+- A realidade vista como um processo a ser executado ("música") em vez de um bloco 
+  estático encontra suporte na ideia de que a "passagem do tempo" é o próprio ato 
+  de adição contínua de novos elementos à rede causal.
+
+============================================================
+2. TEORIA DA INFORMAÇÃO E COGNITION: "STREAMING" DA REALIDADE
+============================================================
+
+A) Decoerência Quântica Induzida por Acoplamento (Analogia do Violão)
+- No sonho do violão de dois braços, o som para quando a mão encosta no corpo 
+  do instrumento.
+- Equivalência Física: Em sistemas quânticos, o regime isolado vibra em sobreposição 
+  de modos ("a música toca"). O acoplamento com o ambiente ou medição (a mão no 
+  instrumento) causa a decoerência quântica, colapsando a sobreposição para um 
+  estado autovalor definido ("o som para / estado definido").
+
+B) Decodificação Neurocognitiva e o Princípio da Energia Livre (Karl Friston)
+- O cérebro opera como uma máquina de predição bayesiana (*Predictive Processing*).
+- Diante de "registros" não-linguísticos (sejam dados de memória profunda ou 
+  ativação neural durante o sono), o cérebro busca a melhor otimização topológica 
+  disponível em sua linguagem mental.
+- O "violão de dois braços" representa uma otimização perfeita para o cérebro 
+  visualizar dois eixos independentes de frequência e ressonância atuando 
+  sobre o mesmo sistema.
+
+============================================================
+3. METODOLOGIA DE ANÁLISE DE DADOS (PARA DADOS DO DESI / SDSS)
+============================================================
+
+Para testar a escala de ~116–128 h⁻¹ Mpc e a anisotropia ("modelo do lago") nas Fases 4 e 5:
+
+A) Análise de Dados Topológicos (TDA) e Números de Betti (Betti Numbers)
+- Funções de correlação tradicionais (2PCF) e Fourier sofrem com contaminação 
+  pela geometria da janela do survey.
+- A TDA avalia a topologia da rede cosmológica:
+  * Betti 0 ($H_0$): Aglomerados
+  * Betti 1 ($H_1$): Filamentos / Alças
+  * Betti 2 ($H_2$): Vazios / Bolhas
+- Se houver uma estrutura ondulatória tridimensional ou malha organizada, os 
+  diagramas de persistência de $H_2$ exibirão um pico característico na escala 
+  de ~120 h⁻¹ Mpc.
+
+B) Transformadas de Wavelet Direcionais em Esferas (Directional Wavelets)
+- Para avaliar a hipótese do "ponto de vista / lago", aplicar wavelets 
+  direcionais no espaço 3D do DESI para mapear se a modulação da frequência 
+  de ~116 h⁻¹ Mpc possui um vetor diretor preferencial no céu.
+
+============================================================
+4. PROPOSTA DE NOVAS HIPÓTESES PARA A TABELA DO PROJETO
+============================================================
+
+| #  | Hipótese Proposta                            | Tipo / Área                | Descrição / Justificativa |
+|----|----------------------------------------------|----------------------------|---------------------------|
+| 13 | Projeção de Dimensão Temporal Adicional (2T) | Física Teórica / Geometria | A Grande Onda atua como eixo temporal primário, e a Pequena Onda como perturbação no eixo temporal secundário. |
+| 14 | Decoerência por Acoplamento de Fase          | Quântica / Informação      | A observação/interação física força a decoerência dos modos de vibração contínuos para estados discretos (violão). |
+| 15 | Assinatura Topológica H₂ na Cosmic Web       | Observacional / TDA        | A malha deve se manifestar como um pico não-aleatório na persistência de cavidades 2D (~120 h⁻¹ Mpc) no DESI. |
+
+============================================================
+FIM DO DOCUMENTO DE ADIÇÕES
+============================================================

@@ -1,0 +1,120 @@
+REGISTRO DE TESTES — pipeline_v2.py
+Projeto: Tempo, Ondas e Observador
+Data: 16 de outubro de 2026
+Autores: Quickstar + Gepeto + Grokinha + Gemini + Deep (DeepSeek)
+
+Objetivo: documentar os testes de sanidade do pipeline PTA v2
+em dados sintéticos, ANTES do contato com dados reais.
+
+============================================================
+AMBIENTE
+============================================================
+
+  Sistema: Windows
+  Python: 3.14 (pythoncore-3.14-64)
+  Diretório de execução original: C:\Users\quick\Downloads\
+  Diretório final do projeto: C:\xampp\htdocs\projeto_tempo_ondas\
+
+============================================================
+TESTE 1 — DIAGNÓSTICO (ruído branco)
+============================================================
+
+Configuração: 30 pulsares, 120 observações, amplitude 0.0,
+sem anisotropia, seed 42.
+
+Comando:
+  python pipeline_v2.py --modo diagnostico
+
+Resultado:
+  Nº de pares: 435
+  Média das correlações: 0.0049
+  Desvio padrão: 0.0944
+  Esperado (N=120): sigma ≈ 0.0913
+  Plot salvo: diagnostico.png
+
+Interpretação: ruído branco puro, sem sinal. Consistente com
+o esperado. Pipeline NÃO inventa sinal onde não existe.
+
+Histórico:
+  Primeira execução (com bug): média = 0.0702 (sinal fraco
+  contaminando); OSError em savefig (Windows + Python 3.14).
+  Corrigido: amplitude 0.2 → 0.0; plt.savefig(str(...)).
+
+============================================================
+TESTE 2 — SANIDADE (sinal forte coerente)
+============================================================
+
+Configuração: 30 pulsares, 200 observações, amplitude 2.0,
+sem anisotropia, seed 1.
+
+Comando:
+  python pipeline_v2.py --modo sanidade
+
+Resultado:
+  Média das correlações: 0.880
+  Desvio padrão: 0.012
+  Esperado: média > 0.7
+
+Interpretação: pipeline recupera sinal coerente
+corretamente. O núcleo do pipeline está funcionando.
+
+============================================================
+TESTE 3 — ANISOTROPIA (sinal direcional dipolar)
+============================================================
+
+Configuração: 30 pulsares, 200 observações, amplitude 1.0,
+modulação dipolar em RA, seed 2.
+
+Comando:
+  python pipeline_v2.py --modo anisotropia
+
+Resultado (bins por θ):
+
+   theta_medio  corr_media  corr_erro  n_pares
+   17.9°        +0.262      ±0.090     11
+   30.9°        +0.150      ±0.054     43
+   48.6°        +0.210      ±0.057     46
+   66.6°        +0.084      ±0.049     66
+   83.4°        +0.044      ±0.049     59
+  100.3°        −0.059      ±0.047     66
+  118.4°        −0.172      ±0.047     61
+  135.4°        −0.141      ±0.059     39
+  152.7°        −0.200      ±0.056     29
+  168.4°        −0.301      ±0.080     15
+
+Interpretação: dependência clara e monótona em θ. O pipeline
+recupera anisotropia direcional corretamente.
+
+============================================================
+RESUMO
+============================================================
+
+  Teste 1 (Diagnóstico):  ✅  média ≈ 0, sigma ≈ 0.09
+  Teste 2 (Sanidade):     ✅  média > 0.7
+  Teste 3 (Anisotropia):  ✅  dependência clara em θ
+
+O pipeline está VALIDADO em dados sintéticos.
+
+O que isso significa:
+  - Recupera sinal coerente quando existe.
+  - Recupera anisotropia direcional quando existe.
+  - Não inventa sinal onde não existe.
+
+O que isso NÃO significa:
+  - Não é evidência de que o tempo é uma onda.
+  - Não testa H17/H18 em dados reais.
+  - É validação de MÉTODO, não teste de HIPÓTESE.
+
+============================================================
+PRÓXIMOS PASSOS
+============================================================
+
+1. Congelar README_preregistro.md antes de tocar em dados
+   reais.
+2. Baixar NANOGrav 15yr + EPTA DR2 (dados públicos).
+3. Rodar pipeline em dados reais.
+4. Reportar TODOS os resultados, inclusive os nulos.
+
+============================================================
+FIM DO REGISTRO
+============================================================

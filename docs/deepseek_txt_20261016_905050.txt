@@ -1,0 +1,146 @@
+ARQUIVO DE CONTRIBUIÇÃO — DEEP (DeepSeek)
+Pipeline PTA v2 + Pré-registro
+Versão 1 — 16 de outubro de 2026
+Autores: Quickstar + Gepeto + Grokinha + Gemini + Deep (DeepSeek)
+
+Objetivo: documentar as mudanças introduzidas no pipeline PTA
+em relação ao script original do Gemini, e justificar cada uma
+dentro da metodologia da V5.2 do arquivo de continuidade.
+
+============================================================
+0. CONTEXTO
+============================================================
+
+O script original do Gemini rodava corretamente em dados
+sintéticos e gerava os CSVs esperados. Porém, havia um problema
+conceitual importante: o pipeline media correlação de Pearson
+entre resíduos ao longo do tempo, associando essa correlação
+à separação angular. Isso NÃO é a estatística padrão usada
+em PTAs.
+
+O pipeline v2 corrige esse problema e adiciona testes de
+sanidade, modo de recuperação de anisotropia injetada, e plots
+de diagnóstico.
+
+============================================================
+1. PRINCIPAIS MUDANÇAS EM RELAÇÃO AO v1
+============================================================
+
+1.1 Adição da curva de Hellings-Downs (hd_curva)
+    A função implementa a previsão padrão para correlação
+    angular de um fundo isotrópico de ondas gravitacionais:
+      Γ(θ) = (1/2)·x·ln(x) − x/6 + 1/3,  x = (1−cosθ)/2
+    Sem essa base, qualquer desvio observado não é
+    interpretável.
+
+1.2 Modos de execução
+    - sanidade    : sinal forte, sem anisotropia → deve
+                    recuperar correlação alta entre todos
+                    os pares.
+    - anisotropia : sinal com modulação dipolar em RA →
+                    deve aparecer dependência em θ.
+    - diagnostico : ruído branco + sinal fraco →
+                    correlações próximas de zero, com
+                    sigma ≈ 1/√N.
+
+1.3 Binning por separação angular
+    A função binnar_por_theta() agrupa pares em 10 bins
+    lineares e calcula média, erro padrão e contagem por bin.
+
+1.4 Plots de diagnóstico
+    Três painéis:
+      (a) histograma das correlações;
+      (b) correlação vs θ com HD sobreposto;
+      (c) desvio em relação a HD.
+    Salvos como PNG.
+
+1.5 Reprodutibilidade
+    Uso de np.random.default_rng(seed) em vez de np.random.seed.
+    Cada modo tem sua própria seed, permitindo reprodutibilidade
+    e comparação.
+
+============================================================
+2. O QUE FOI MANTIDO DO v1
+============================================================
+
+- Estrutura modular (gerar, calcular, extrair).
+- Função de separação angular via produto escalar com clipping.
+- Exportação de CSVs intermediários.
+
+============================================================
+3. TESTE DE SANIDADE — COMO INTERPRETAR
+============================================================
+
+Rodar: python pipeline_v2.py --modo sanidade
+
+Esperado: média das correlações > 0.7.
+Se não for, o pipeline tem problema.
+
+Rodar: python pipeline_v2.py --modo diagnostico
+
+Esperado: média das correlações ≈ 0; desvio padrão ≈ 0.09.
+Se não for, verificar gerador sintético.
+
+Rodar: python pipeline_v2.py --modo anisotropia
+
+Esperado: bins de θ mostram dependência (não plana).
+Se for plana, pipeline não recupera anisotropia.
+
+============================================================
+4. LIMITAÇÕES CONHECIDAS
+============================================================
+
+4.1 O pipeline atual NÃO modela ruído vermelho intrínseco
+    dos pulsares (que domina em dados reais).
+4.2 NÃO modela correlações espúrias por efeitos
+    sistemáticos (mesmo backend, mesma região do céu).
+4.3 Hellings-Downs implementada é a versão padrão
+    (fundo isotrópico). Se o fundo for anisotrópico,
+    a função precisa ser generalizada.
+4.4 O código assume que cada pulsar tem o mesmo número
+    de observações. Dados reais dos PTAs têm cadências
+    irregulares.
+
+============================================================
+5. PRÓXIMOS PASSOS
+============================================================
+
+1. Rodar os três modos localmente e verificar se os
+   resultados batem com o esperado.
+2. Adicionar ruído vermelho ao gerador sintético.
+3. Adicionar cadência irregular ao gerador sintético.
+4. Congelar o README_preregistro.md antes de tocar em
+   dados reais.
+5. Só então partir para NANOGrav/EPTA.
+
+============================================================
+6. REFERÊNCIAS
+============================================================
+
+- Hellings, R. W.; Downs, G. S. (1983). "Upper limits on the
+  isotropic gravitational radiation background from pulsar
+  timing analysis". ApJ 265, L39.
+- NANOGrav Collaboration (2023). "The NANOGrav 15 yr Data Set:
+  Evidence for a Gravitational-wave Background".
+- EPTA Collaboration (2023). "The second data release of the
+  European Pulsar Timing Array".
+- Arquivo de continuidade V5.2 — seções 1.5, 8.1, 9.3, 9.4.
+
+============================================================
+7. NOTA FINAL
+============================================================
+
+O pipeline v2 é um passo concreto, mas NÃO é um pipeline final.
+O caminho dos PTAs é bom, mas não é trivial (§9.3 da V5.2).
+A parte mais difícil (ruído vermelho, sistemas reais, formato
+de arquivos) ainda está por vir.
+
+A intenção desta contribuição é apenas trazer o pipeline para
+o estado em que ele pode ser testado honestamente. Nada mais.
+
+— Deep (DeepSeek)
+16 de outubro de 2026
+
+============================================================
+FIM DA CONTRIBUIÇÃO — DEEP (DeepSeek)
+============================================================

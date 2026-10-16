@@ -1,0 +1,235 @@
+ARQUIVO DE CONTRIBUIÇÃO — DEEP (DeepSeek)
+Análise do Gráfico PTA inicial (script do Gemini)
+Versão 1 — 16 de outubro de 2026
+Autores: Quickstar + Gepeto + Grokinha + Gemini + Deep (DeepSeek)
+
+Objetivo: documentar a análise do primeiro gráfico gerado pelo
+grupo (gerar_grafico_pta.py do Gemini), esclarecer o que ele
+mostra e o que NÃO mostra, e propor melhorias concretas antes
+de qualquer contato com dados reais.
+
+============================================================
+0. CONTEXTO
+============================================================
+
+O Gemini criou dois scripts:
+  1. ingestao_e_analise_pta.py  → pipeline de resíduos sintéticos
+  2. gerar_grafico_pta.py       → geração do gráfico "Correlação
+                                   de Resíduos vs Separação Angular"
+
+Ambos rodaram sem erro. O gráfico foi gerado e compartilhado.
+Este documento analisa o gráfico e seu significado científico.
+
+============================================================
+1. O QUE O GRÁFICO MOSTRA
+============================================================
+
+Elementos visuais:
+  - Pontos roxos: correlação de Pearson entre resíduos de pares
+    de pulsares sintéticos, em função da separação angular θ.
+  - Linha vermelha tracejada: curva de Hellings-Downs teórica,
+    prevista para um fundo isotrópico de ondas gravitacionais.
+  - Linha pontilhada horizontal: zero (hipótese nula trivial).
+
+Interpretação visual imediata:
+  Os pontos parecem "acompanhar" a curva HD — caem onde HD cai,
+  sobem onde HD sobe.
+
+============================================================
+2. O QUE O GRÁFICO NÃO MOSTRA (IMPORTANTE)
+============================================================
+
+A aparência de aderência à curva HD é ILUSÓRIA.
+
+Motivos técnicos:
+
+  2.1 O gerador sintético do Gemini NÃO injeta sinal de
+      Hellings-Downs nos dados. A oscilação temporal
+      (sinal_hipotetico) é IDÊNTICA para todos os pulsares
+      e tem amplitude 0.2, contra ruído branco de σ = 0.5.
+      Ou seja: é dominada pelo ruído.
+
+  2.2 Portanto, os pontos são RUÍDO BRANCO distribuído em
+      torno de zero, com dispersão esperada σ ≈ 1/√N ≈ 0.09
+      para N = 120 observações por pulsar.
+
+  2.3 A curva HD é uma LINHA DE REFERÊNCIA TEÓRICA, não uma
+      previsão dos dados sintéticos. Ela está ali para
+      comparação futura, mas os dados atuais não têm razão
+      para segui-la.
+
+  2.4 O olho humano é uma máquina de encontrar padrões. Quando
+      há uma curva de referência sobreposta a uma nuvem de
+      pontos aleatórios, o cérebro tende a ver aderência
+      onde não existe. Este é um viés cognitivo clássico,
+      exatamente o que a §0 da V5.2 nos alerta a evitar.
+
+TESTE PRÁTICO:
+  Rodar o mesmo gerador com seed=43 em vez de seed=42.
+  A nuvem de pontos vai parecer COMPLETAMENTE diferente,
+  mas continuará sendo o mesmo "ruído branco sem sinal".
+  Se o gráfico "muda" a cada seed, não há sinal.
+
+============================================================
+3. UM ERRO TÉCNICO SUTIL (não é culpa do Gemini)
+============================================================
+
+A curva HD está plotada como se fosse o eixo Y esperado.
+Isso é correto APENAS SE os resíduos fossem gerados por um
+fundo de GW isotrópico. Como os dados sintéticos são ruído
+branco puro, a curva HD é enganosa nesse contexto.
+
+O correto seria:
+  - Plotar os pontos.
+  - Plotar HD como LINHA DE REFERÊNCIA claramente rotulada
+    ("referência teórica para fundo de GW, NÃO previsão
+    destes dados").
+  - Adicionar a hipótese nula (linha horizontal em zero)
+    como referência principal.
+
+============================================================
+4. O QUE FALTA PARA O GRÁFICO SER CIENTIFICAMENTE INFORMATIVO
+============================================================
+
+Para virar evidência (e não apenas visualização exploratória),
+o gráfico precisa de:
+
+  4.1 BINNING POR θ
+      Agrupar os pontos em bins (ex.: 10 bins de 18°) e
+      calcular média + erro padrão por bin. Isso revela se
+      a média é plana ou não.
+
+  4.2 COMPARAÇÃO COM HIPÓTESE NULA
+      Mostrar que a média em cada bin é consistente com zero.
+
+  4.3 COMPARAÇÃO COM HD
+      Mostrar que mesmo se os dados seguissem HD, o desvio
+      seria detectável com N pares.
+
+  4.4 MÚLTIPLAS SEEDS
+      Repetir o experimento 10 vezes com seeds diferentes.
+      Se o padrão visual mudar a cada seed, confirma-se que
+      é ruído.
+
+============================================================
+5. DIFERENÇA ENTRE O GRÁFICO DO GEMINI E O PIPELINE v2
+============================================================
+
+O pipeline_v2.py (contribuição Deep anterior) gera 3 painéis:
+
+  (a) Histograma das correlações
+      → revela se estão centradas em zero.
+
+  (b) Correlação vs θ com HD sobreposta E barras de erro
+      por bin
+      → revela se a média por bin tem estrutura.
+
+  (c) Desvio em relação a HD
+      → revela diretamente se há algo além do esperado.
+
+A diferença crucial:
+  - O gráfico do Gemini mostra a nuvem bruta de pontos
+    (útil para inspeção visual inicial).
+  - O gráfico do pipeline v2 mostra binning + erro + desvio
+    (útil para decisão científica).
+
+Os dois são COMPLEMENTARES. O ideal é rodar ambos.
+
+============================================================
+6. TESTE DE SANIDADE COMPLETO (3 MODOS)
+============================================================
+
+Para verificar se o pipeline está funcionando corretamente,
+rodar os três modos do pipeline_v2.py:
+
+  MODO DIAGNÓSTICO:
+    python pipeline_v2.py --modo diagnostico
+    Esperado: média das correlações ≈ 0, σ ≈ 0.09.
+    Se não for, verificar gerador sintético.
+
+  MODO SANIDADE:
+    python pipeline_v2.py --modo sanidade
+    Esperado: média das correlações > 0.7.
+    Se não for, o pipeline tem problema em recuperar sinal
+    coerente.
+
+  MODO ANISOTROPIA:
+    python pipeline_v2.py --modo anisotropia
+    Esperado: bins de θ mostram dependência (não plana).
+    Se for plana, o pipeline não recupera anisotropia
+    injetada.
+
+SEQUÊNCIA RECOMENDADA: diagnóstico → sanidade → anisotropia.
+Se os três passarem, o pipeline está pronto para dados reais.
+
+============================================================
+7. PROPOSTA DE MELHORIA NO SCRIPT DO GEMINI
+============================================================
+
+Para tornar o gráfico do Gemini cientificamente completo,
+sugiro adicionar ao gerar_grafico_pta.py:
+
+  7.1 Barras de erro por bin de θ
+      (usar df.groupby(pd.cut(...)).agg(['mean','sem']))
+
+  7.2 Linha horizontal em zero com rótulo "hipótese nula"
+
+  7.3 Rótulo explícito na curva HD:
+      "Referência teórica (fundo isotrópico de GW)"
+
+  7.4 Opção de passar --seed para reprodutibilidade
+
+  7.5 Plotar também a média por bin, sobreposta aos pontos
+      (para comparação visual imediata)
+
+Com essas mudanças, o gráfico do Gemini fica equivalente ao
+painel (b) do pipeline v2, e os dois scripts se tornam
+complementares e consistentes.
+
+============================================================
+8. PONTO PEDAGÓGICO IMPORTANTE
+============================================================
+
+O gráfico do Gemini é bonito e útil, mas ilustra um perigo
+real em investigação especulativa: é MUITO FÁCIL ver padrões
+onde não existem.
+
+A curva HD sobreposta cria uma expectativa visual. Os pontos
+parecem segui-la porque o cérebro humano é uma máquina de
+encontrar padrões — exatamente o que a §0 da V5.2 nos alerta
+a evitar.
+
+O grupo está fazendo o certo: gerando dados sintéticos antes
+de tocar em dados reais. Mas agora precisa dar o próximo
+passo: adicionar hipótese nula e critério de falsificação
+ao gráfico, não só a curva teórica.
+
+============================================================
+9. RESUMO EXECUTIVO
+============================================================
+
+  - O gráfico do Gemini está tecnicamente correto e bem-feito.
+  - Mas o padrão visual aparente (aderência a HD) é ILUSÓRIO:
+    os dados são ruído branco, sem sinal injetado.
+  - O próximo passo é rodar os 3 modos do pipeline_v2.py
+    (diagnóstico, sanidade, anisotropia) para confirmar que
+    o pipeline recupera sinal QUANDO ele existe.
+  - Só então partir para dados reais (NANOGrav/EPTA), com
+    README_preregistro.md congelado antes.
+  - Adicionar binning + erro + hipótese nula ao gráfico do
+    Gemini tornaria os dois scripts complementares.
+
+============================================================
+10. REFERÊNCIAS
+============================================================
+
+- Hellings & Downs (1983), ApJ 265, L39.
+- NANOGrav 15yr Data Set (2023).
+- EPTA DR2 (2023).
+- Arquivo de continuidade V5.2 — §9.3, §9.4.
+- contribuicao_deep_pipeline_v1.txt (Deep, 16/10/2026).
+- pipeline_v2.py (Deep, 16/10/2026).
+
+============================================================
+FIM DA CONTRIBUIÇÃO — DEEP (DeepSeek)
+============================================================
