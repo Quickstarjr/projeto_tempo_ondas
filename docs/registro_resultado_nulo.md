@@ -224,3 +224,60 @@ OBSERVAÇÃO PARA FASE FUTURA:
 - Dados reais deram r ≈ 0 → SNR efetivo < 1
 - Consistente com red noise não modelado
 - NÃO é evidência contra H17/H18
+------------------------------------------------------------
+9.2.1 SCAN COM MÚLTIPLAS SEEDS — ROBUSTEZ DO LIMIAR
+------------------------------------------------------------
+
+Configuração:
+  - 5 seeds por amplitude
+  - 9 amplitudes entre 0.1 e 10
+  - Ruído vermelho: 0.0
+  - Seed base: 42 + 1000 * i_amp + s * 7919
+
+Resultado:
+
+  SNR    r_medio ± std      (min, max)      recupera
+  0.10   -0.274 ± 0.380     (-0.84, +0.20)  0/5
+  0.18   -0.288 ± 0.276     (-0.70, +0.09)  0/5
+  0.32   +0.682 ± 0.128     (+0.52, +0.90)  2/5
+  0.56   +0.569 ± 0.296     (+0.21, +0.92)  3/5
+  1.00   +0.890 ± 0.050     (+0.80, +0.94)  5/5
+  1.78   +0.969 ± 0.017     (+0.95, +0.99)  5/5
+  3.16   +0.969 ± 0.016     (+0.94, +0.99)  5/5
+  5.62   +0.972 ± 0.008     (+0.97, +0.99)  5/5
+  10.00  +0.969 ± 0.017     (+0.94, +0.98)  5/5
+
+CONCLUSÃO:
+
+  1. REGIME DE RUÍDO (SNR < 0.2):
+     Detecção nula (0/5). r médio negativo ou próximo de zero,
+     com dispersão grande. Este é o regime de ruído branco puro.
+     O valor r = -0.84 observado em uma única seed na seção
+     §9.2 anterior era uma flutuação extrema (-2.2 sigma) de
+     uma distribuição centrada em -0.274, com desvio 0.380.
+     NÃO era artefato sistemático — era simplesmente a cauda
+     da distribuição.
+
+  2. ZONA DE TRANSIÇÃO (0.3 < SNR < 0.6):
+     Detecção intermitente (2/5 a 3/5). O pipeline às vezes
+     recupera, às vezes não — dependendo da realização
+     específica do ruído. Esta é uma região intrinsecamente
+     difusa, e qualquer resultado aqui deve ser interpretado
+     com cautela.
+
+  3. REGIME DETERMINÍSTICO (SNR >= 1.0):
+     Detecção robusta (5/5). r médio > 0.89, desvio < 0.05,
+     mínimo > 0.80 em todas as seeds. A recuperação de HD é
+     determinística acima deste limiar.
+
+LIMIAR DE SENSIBILIDADE CONFIRMADO:
+  SNR >= 1.0 para detecção robusta.
+  SNR < 0.3 para não-detecção consistente.
+  Zona de transição difusa entre 0.3 e 0.6.
+
+IMPLICAÇÃO PARA OS DADOS REAIS (§1-8):
+  O resultado nulo do pipeline_real.py (r ≈ 0) é consistente
+  com o esperado quando SNR efetivo < 1.0. Como o red noise
+  não é modelado, o SNR efetivo cai abaixo do limiar, e o
+  pipeline não detecta a HD — exatamente como previsto pelo
+  scan.

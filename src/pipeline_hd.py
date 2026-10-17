@@ -305,74 +305,116 @@ def teste_scan(
     n_bins=120,
     amplitudes=None,
     ruido_vermelho=0.0,
+    n_seeds=5,
     output_dir='outputs/plots',
 ):
     """
     Varre amplitude do sinal HD e verifica em que ponto o pipeline
-    começa a recuperá-lo. Isso dá o LIMIAR DE SENSIBILIDADE.
+    começa a recuperá-lo. Roda N seeds por amplitude para medir
+    robustez estatística do limiar de sensibilidade.
 
-    NOTA: usa seed diferente por amplitude para evitar artefato
-    de correlação espúria em SNR baixo (ver §9.2 do registro).
+    Referência: Passo 1 do plano consolidado (Deep + Gemini + Gepeto).
     """
     if amplitudes is None:
         amplitudes = np.logspace(-1, 1, 9)  # 0.1 a 10
 
-    print("=== TESTE 2 — SCAN DE AMPLITUDE ===")
+    print("=== TESTE 2 — SCAN DE AMPLITUDE (5 SEEDS POR PONTO) ===")
     print(f"Amplitudes testadas: {amplitudes}")
     print(f"Ruído vermelho:      {ruido_vermelho}")
+    print(f"Seeds por amplitude: {n_seeds}")
     print()
 
     from scipy.stats import pearsonr
 
     resultados = []
     for i_amp, amp in enumerate(amplitudes):
-        seed_amp = 42 + 1000 * i_amp
-        df, _, _ = gerar_dataset_hd(
-            n_pulsares=n_pulsares,
-            n_bins=n_bins,
-            amplitude_sinal=amp,
-            amplitude_ruido_branco=1.0,
-            amplitude_ruido_vermelho=ruido_vermelho,
-            seed=seed_amp,
-        )
-        df = reamostrar(df)
-        pares = calcular_pares(df)
-        bins = binnar(pares)
+        r_seeds = []
+        p_seeds = []
 
-        if len(bins) < 3:
-            r, p = 0.0, 1.0
-        else:
-            r, p = pearsonr(bins['corr_media'], bins['hd_medio'])
+        for s in range(n_seeds):
+            seed_s = 42 + 1000 * i_amp + s * 7919
+            df, _, _ = gerar_dataset_hd(
+                n_pulsares=n_pulsares,
+                n_bins=n_bins,
+                amplitude_sinal=amp,
+                amplitude_ruido_branco=1.0,
+                amplitude_ruido_vermelho=ruido_vermelho,
+                seed=seed_s,
+            )
+            df = reamostrar(df)
+            pares = calcular_pares(df)
+            bins = binnar(pares)
+
+            if len(bins) < 3:
+                r, p = 0.0, 1.0
+            else:
+                r, p = pearsonr(bins['corr_media'], bins['hd_medio'])
+
+            r_seeds.append(r)
+            p_seeds.append(p)
+
+        r_medio = float(np.mean(r_seeds))
+        r_std = float(np.std(r_seeds))
+        r_min = float(np.min(r_seeds))
+        r_max = float(np.max(r_seeds))
+        p_mediano = float(np.median(p_seeds))
+
+        n_recupera = sum(
+            1 for r, p in zip(r_seeds, p_seeds) if r > 0.7 and p < 0.05
+        )
+        fracao = n_recupera / n_seeds
 
         snr = amp / 1.0
         resultados.append({
             'amplitude': amp,
             'snr': snr,
-            'pearson_r': r,
-            'pearson_p': p,
-            'recupera': r > 0.7 and p < 0.05,
+            'r_medio': r_medio,
+            'r_std': r_std,
+            'r_min': r_min,
+            'r_max': r_max,
+            'p_mediano': p_mediano,
+            'fracao_recupera': fracao,
         })
-        print(f"  amp={amp:.3f}  SNR={snr:.2f}  r={r:.3f}  "
-              f"p={p:.3f}  recupera={resultados[-1]['recupera']}")
+
+        print(
+            f"  amp={amp:.3f}  SNR={snr:.2f}  "
+            f"r={r_medio:.3f}±{r_std:.3f}  "
+            f"(min={r_min:.2f}, max={r_max:.2f})  "
+            f"p_med={p_mediano:.3f}  "
+            f"recupera={n_recupera}/{n_seeds}"
+        )
 
     df_res = pd.DataFrame(resultados)
-    df_res.to_csv(Path(output_dir) / 'scan_hd.csv', index=False)
+    out = Path(output_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    df_res.to_csv(out / 'scan_hd_5seeds.csv', index=False)
 
+    # Plot com barras de erro
     fig, ax = plt.subplots(figsize=(10, 6))
-    ax.plot(df_res['snr'], df_res['pearson_r'], 'o-')
-    ax.axhline(0.7, color='red', linestyle='--',
-               label='limiar r=0.7')
+    ax.errorbar(
+        df_res['snr'], df_res['r_medio'], yerr=df_res['r_std'],
+        fmt='o-', capsize=3,
+        label=f'média ± desvio ({n_seeds} seeds)'
+    )
+    ax.fill_between(
+        df_res['snr'], df_res['r_min'], df_res['r_max'],
+        alpha=0.2, label=f'min-max ({n_seeds} seeds)'
+    )
+    ax.axhline(0.7, color='red', linestyle='--', label='limiar r=0.7')
     ax.set_xscale('log')
     ax.set_xlabel('SNR (amplitude / ruído branco)')
     ax.set_ylabel('Pearson r (Γ_recuperado × HD)')
-    ax.set_title('Teste 2 — Limiar de sensibilidade do pipeline')
+    ax.set_title(
+        f'Teste 2 — Limiar de sensibilidade '
+        f'({n_seeds} seeds por amplitude)'
+    )
     ax.legend()
     ax.grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.savefig(str(Path(output_dir) / 'scan_hd.png'), dpi=120)
+    plt.savefig(str(out / 'scan_hd_5seeds.png'), dpi=120)
     plt.close()
-    print(f"\n[+] Resultados: {output_dir}/scan_hd.csv")
-    print(f"[+] Plot:       {output_dir}/scan_hd.png")
+    print(f"\n[+] Resultados: {out / 'scan_hd_5seeds.csv'}")
+    print(f"[+] Plot:       {out / 'scan_hd_5seeds.png'}")
 
 # ============================================================
 # MAIN
