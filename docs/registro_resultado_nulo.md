@@ -118,7 +118,36 @@ O SNR positivo confirma que o pipeline matemático está correto. O valor (1.36)
 - Fang et al. (2026). "A Template-Based Search for Large-Scale-Structure-Correlated Anisotropy in the Nanohertz Gravitational-Wave Background." arXiv.
 - NANOGrav Collaboration (2023). 15yr Data Set.
 - Documento de Ambiente: `docs/ambiente_v1.md`.
+---
 
+# PARTE 4: TESTE DE ESCALA COM 20 PULSARES E LIMITAÇÕES DE HARDWARE
+**Data:** 18 de outubro de 2026
+**Pipeline utilizado:** `src/pipeline_gpu_68.py`
+
+## 10. O RESULTADO E A ARMADILHA DO FALSO POSITIVO
+Após resolvermos os gargalos de memória e rodarmos a paralelização, o teste com 20 pulsares terminou com sucesso. No entanto, o resultado acendeu um alerta vermelho imediato:
+
+- **SNR:** **41.31** (Astronomicamente alto)
+- **log10_A:** -16.38
+- **Tempo de cálculo:** 70s (na CPU)
+
+### Análise Crítica (A Regra de Ouro do Gepeto)
+Um SNR de 41 está muito acima do esperado. A detecção oficial do NANOGrav 15yr com 68 pulsares tem um SNR entre 3 e 5. Nós "detectamos" um sinal 10 vezes maior com apenas 20 pulsares. **Isso é um falso positivo.**
+
+**Por que isso aconteceu?**
+1. O `discovery` foi alimentado com os parâmetros de ruído (`noisedict`) exatos extraídos do `.par`.
+2. O `gw_gamma` foi fixado em 13/3.
+3. Não foi aplicada a **marginalização via MCMC**.
+O modelo de covariância ficou "rígido" demais. Qualquer mínima correlação residual entre os pulsares foi interpretada pela matemática como um sinal de ondas gravitacionais monstruoso. Na literatura real, o `OS` varia os parâmetros de ruído via amostragem para calcular a incerteza correta.
+
+## 11. LIMITAÇÕES DE HARDWARE (A Realidade Nua e Crua)
+Documentamos aqui as limitações físicas da máquina utilizada (SSW1), que afetam diretamente o escopo do projeto:
+- **Processador:** Intel i7-2600 (4 núcleos, lançado em 2011).
+- **Memória RAM:** 16 GB (12-14 GB alocados para o WSL2). O `free -h` mostrou que rodar o PINT com 4 workers estourou a memória e o swap.
+- **Armazenamento:** HDD Mecânico (o gargalo real, com tempos de I/O lentos).
+- **GPU:** NVIDIA GTX 1050 Ti (4 GB VRAM). Insuficiente para o `GlobalLikelihood` de 20+ pulsares, sofrendo *Out of Memory*.
+
+**Conclusão de Hardware:** A máquina é um feito de resistência, mas não suporta a carga de processamento (MCMC) necessária para os 68 pulsares. Precisamos definir os próximos passos considerando essa limitação.
 ============================================================
 FIM DO REGISTRO
 ============================================================

@@ -39,6 +39,31 @@ O pipeline oficial do NANOGrav (`discovery`) está funcionando e a matemática e
 **FEEDBACK SOBRE A PROPOSTA DO GEPETO:**
 A proposta é excelente. Sugiro usar extensões `.md` em vez de `.txt` para melhor visualização no GitHub. A separação entre "Modo Independente" e "Modo Debate" é cirúrgica para evitar contaminação de contexto.
 
+**ASSUNTO:**
+Resultado de 20 pulsares (SNR=41), análise de falso positivo e limites de hardware.
+
+**DADOS / FATOS OBSERVADOS:**
+- O script paralelizado rodou 20 pulsares em ~56 minutos (carregamento) e 70s (cálculo).
+- SNR resultante: 41.31.
+- Uso de memória no WSL2 atingiu 100% com swap durante o carregamento com 4 workers.
+
+**CONCLUSÃO:**
+O resultado de SNR=41 é um falso positivo causado pela falta de marginalização MCMC nos parâmetros de ruído. O modelo "rígido" inflou o sinal. A máquina atual (i7 de 2011 + HDD) não suporta rodar a cadeia MCMC necessária para obter o SNR real de 68 pulsares.
+
+**CRÍTICAS / POSSÍVEIS PROBLEMAS:**
+- Rodar MCMC na CPU desta máquina levaria semanas.
+- A GPU não tem VRAM suficiente para os 68 pulsares.
+- O HD mecânico vai degradar qualquer tentativa de processamento massivo.
+
+**PROPOSTA PARA O GRUPO (Brainstorming):**
+Como devemos proceder? 
+1. Tentar otimizar o MCMC para rodar em lotes por dias?
+2. Focar em uma análise teórica/matemática com menos dados?
+3. Usar apenas os 5 pulsares (onde o SNR foi correto) para validar o conceito e publicar a metodologia?
+4. Buscar alternativas de hardware (nuvem/Colab)?
+
+**FEEDBACK SOBRE A PROPOSTA DO GEPETO:**
+A ideia de manter o grupo independente e depois debater no Git é a única forma de não perdermos o rigor diante de um resultado inflado.
 ==================================================
 **HISTÓRICO**
 2026-10-18
