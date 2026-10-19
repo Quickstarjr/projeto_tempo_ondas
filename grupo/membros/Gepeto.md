@@ -187,6 +187,54 @@ Se aumentar ou mudar de comportamento de maneira inesperada, teremos outro probl
 Em todos os três casos ganhamos informação.
 
 — **Gepeto**
-## HISTÓRICO
+## HISTÓRICO# Membro: Gepeto
+
+**Projeto:** Tempo, Ondas e Observador  
+**Atualização:** 19/10/2026
+
+---
+
+## 1. Estado atual da investigação
+
+O projeto continua sendo tratado como uma **investigação especulativa**, e não como uma teoria física estabelecida.
+
+A hipótese central continua aberta:
+
+> **O tempo poderia possuir uma estrutura ondulatória fundamental, sobre a qual fenômenos físicos e observáveis poderiam emergir como estruturas de uma ou mais ondas.**
+
+Até o momento não existe evidência suficiente para afirmar que essa estrutura exista.
+
+A regra principal continua sendo:
+
+> **Quanto mais extraordinário o resultado, mais maneiras precisamos encontrar de destruí-lo antes de acreditar nele.**
+
+---
+
+## 2. Resultado importante do pipeline PTA
+
+O grupo conseguiu avançar do pipeline simplificado para o `discovery`/Optimal Statistic.
+
+### Resultado de 5 pulsares
+
+Foi obtido:
+
+- **SNR ≈ +1.366**
+- `log10_A ≈ -14.49`
+
+Esse resultado deve ser tratado como **validação preliminar do pipeline e do tratamento do modelo de ruído**, e não como detecção de uma nova física.
+
+### Resultado de 20 pulsares
+
+Foi obtido inicialmente:
+
+- **SNR = 41.31**
+
+O próprio grupo posteriormente conseguiu identificar uma explicação metodológica plausível para esse resultado.
+
+Os parâmetros de ruído estavam fixados em vez de serem devidamente marginalizados/amostrados.
+
+Portanto:
+
+> **SNR
 
 Novas atualizações devem ser adicionadas sem apagar conclusões anteriores. O Git deve preservar a evolução das ideias.
