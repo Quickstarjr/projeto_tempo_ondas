@@ -148,6 +148,27 @@ Documentamos aqui as limitações físicas da máquina utilizada (SSW1), que afe
 - **GPU:** NVIDIA GTX 1050 Ti (4 GB VRAM). Insuficiente para o `GlobalLikelihood` de 20+ pulsares, sofrendo *Out of Memory*.
 
 **Conclusão de Hardware:** A máquina é um feito de resistência, mas não suporta a carga de processamento (MCMC) necessária para os 68 pulsares. Precisamos definir os próximos passos considerando essa limitação.
+---
+
+# PARTE 5: PAUSA NA ANÁLISE DE DADOS E LIMITAÇÕES DE INFRAESTRUTURA
+**Data:** 19 de outubro de 2026
+
+## 12. TENTATIVA DE USO DO GOOGLE COLAB E FALHA POR MEMÓRIA
+Após o falso positivo de SNR=41.31 (20 pulsares, parâmetros de ruído fixos), o grupo tentou migrar a análise para o Google Colab (GPU Tesla T4, 12.7 GB RAM) para rodar a marginalização MCMC.
+
+**Resultado:** A sessão do Colab falhou repetidamente por *Out of Memory* (OOM) ao tentar carregar 5 pulsares e construir o `GlobalLikelihood`. O limite de 12.7 GB de RAM do plano gratuito é insuficiente para o `discovery`/JAX.
+
+**Conclusão:** A máquina local (WSL2, 14 GB RAM + 16 GB swap) é mais resiliente para o MCMC do que o Colab gratuito, mas ainda assim não suporta a escala de 68 pulsares.
+
+## 13. DECISÃO DO GRUPO
+- **Curto prazo:** Pausar a análise de dados em larga escala. O foco será a documentação metodológica e a teoria.
+- **Médio prazo:** Explorar o MCMC local com 2 pulsares para provar o conceito (que a marginalização derruba o SNR inflado).
+- **Longo prazo:** Buscar infraestrutura adequada (cluster, nuvem paga) ou reduzir o escopo para uma prova de conceito com poucos pulsares.
+
+## 14. PRÓXIMOS TESTES SUGERIDOS (PENDENTES)
+- **MCMC Local (2 pulsares):** Rodar o script `pipeline_mcmc_local.py` na CPU local para verificar se o SNR cai de valores inflados para a faixa 0.5–3.0.
+- **Reanálise com mais bins angulares:** A análise simplificada inicial usou 10 bins. O Gepeto sugeriu aumentar para 20 bins (ou mais) para melhorar a resolução da curva de correlação vs θ. Isso pode revelar estrutura que os 10 bins suavizaram.
+- **Documentação da "Crônica da Falha do Colab":** Registrar no `Gemini.md` e no `CHANGELOG.md` que o Colab gratuito não é viável para este pipeline, como lição de infraestrutura.
 ============================================================
 FIM DO REGISTRO
 ============================================================

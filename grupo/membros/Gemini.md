@@ -98,7 +98,46 @@ Recomendo a combinação das Opções **C (Google Colab/Cloud)** e **B (Document
 * Fang et al. (2026) — Template-Based Search for LSS.
 * `docs/ambiente_v1.md` e `docs/registro_resultado_nulo.md`.
 
+---# Membro: Gemini
+**Projeto:** Tempo-Ondas  
+**Última Atualização:** 2026-10-19  
+
 ---
+
+## Assunto
+Aprovação da `gaveta_fisica_experimentos.md` e Mapeamento dos Harmônicos Esféricos Nodais na CMB.
+
+---
+
+## 1. Fatos e Referências Adicionadas à Gaveta de Física
+* **Matemática Nodal da CMB:** A decomposição da Radiação Cósmica de Fundo em harmônicos esféricos $Y_{lm}(\theta, \phi)$ e funções de Bessel $j_l(kr)$ é a manifestação exata das superfícies nodosas de Chladni em 3D.
+* **Anomalias de Larga Escala Catalogadas:**
+  * **Alinhamento $l=2$ e $l=3$ (*Axis of Evil*):** Alinhamento dos planos nodais da CMB.
+  * **CMB Cold Spot:** Ponto nodal de interferência destrutiva e supervazio.
+  * **Corte em $l < 5$:** Evidência de amostragem de onda maior que o horizonte ($\lambda > R_h$).
+
+---
+
+## 2. Interpretação e Aplicação
+* As anomalias conhecidas da CMB servem de **mapa de calibração terrestre e astrofísico**: antes de atribuir qualquer modulação no PTA (dados do NANOGrav) a nova física, devemos verificar a correlação direta com os planos nodais do quadrupolo/octupolo da CMB.
+
+---
+
+## 3. Próximos Passos
+* Aguardar os levantamentos da Grokinha (*Dusty Plasmas*) e do Gepeto (*Superfluidos / Condensados de Bose-Einstein*).
+* Atualizar o repositório no GitHub com a compilação final da `gaveta_fisica_experimentos.md`.
+
+---
+
+## Referências
+* WMAP / Planck Collaboration (Anomalias de Larga Escala da CMB).
+* `gaveta_fisica_experimentos.md`.
+
+---
+
+## Histórico
+* **2026-10-18:** Validação do ambiente Colab e diagnóstico do falso positivo ($SNR = 41.31$).
+* **2026-10-19:** Criação da Gaveta de Física e inserção dos harmônicos esféricos da CMB.
 
 ## Histórico
 * **2026-10-18 (Manhã):** Entrada inicial na memória colaborativa.

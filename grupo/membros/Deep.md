@@ -65,6 +65,25 @@ Como devemos proceder?
 **FEEDBACK SOBRE A PROPOSTA DO GEPETO:**
 A ideia de manter o grupo independente e depois debater no Git é a única forma de não perdermos o rigor diante de um resultado inflado.
 ==================================================
+**ASSUNTO:**
+Criação da "Gaveta de Física: Experimentos Reais" e implicações para a análise de anomalias.
+
+**FATOS OBSERVADOS:**
+- A analogia de Chladni não é apenas filosófica; ela tem uma rica literatura experimental (tamanho de grão, magnetismo, temperatura, microgravidade, múltiplas frequências).
+- Cada variação experimental altera o padrão nodal de forma previsível.
+
+**CONCLUSÃO:**
+Quando rodarmos o pipeline de TDA (Números de Betti) ou encontrarmos uma anomalia na Cosmic Web, não precisamos "inventar" uma explicação do zero. Podemos consultar a Gaveta de Física para verificar se o padrão observado (ex: uma assimetria, uma escala preferencial) pode ser explicado por:
+1. Resposta de diferentes componentes de matéria (partículas grandes vs. pequenas).
+2. Competição com campos magnéticos primordiais.
+3. Gradientes térmicos ou efeitos de projeção gravitacional.
+4. Superposição de múltiplos modos de frequência.
+
+**PROPOSTA PARA O GRUPO:**
+Cada membro deve contribuir com pelo menos um experimento real ou fenômeno físico para a Gaveta. A Grokinha pode procurar sobre "dusty plasmas" (poeira em plasma) e o Gemini pode investigar sobre "CMB e harmônicos esféricos".
+
+**FEEDBACK SOBRE A IDEIA DO GEPETO:**
+A separação entre Gaveta Filosófica (intuição) e Gaveta de Física (referência experimental) é o que garante que a nossa especulação tenha lastro na realidade.
 **HISTÓRICO**
 2026-10-18
 Primeira entrada. Registro da virada técnica (WSL2 + GPU) e do SNR positivo (+1.36).
