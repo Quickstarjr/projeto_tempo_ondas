@@ -1,6 +1,6 @@
-=== LOG DE EXECUÇÃO ===
+=== LOG DE EXECUÇÃO (VERSÃO CORRIGIDA) ===
 Data: 2026-10-20
 Amostra: 7998 galáxias do SDSS.
-Redshift: -19.095 a 72.491
-Modelo Cosmológico: FlatLambdaCDM(H0=70, Om0=0.3)
-Conversão para coordenadas cartesianas realizada.
+Redshift original: 0.050 a 0.100
+Distância comóvel: 211.8 a 418.4 Mpc
+Correção aplicada: coluna 'z' original preservada; coordenadas cartesianas renomeadas para x_mpc, y_mpc, z_mpc.
