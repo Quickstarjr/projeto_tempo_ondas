@@ -1,6 +1,6 @@
 {
   "num_galaxias_originais": 7919,
-  "num_galaxias_amostra": 1500,
-  "max_aneis_H1_simultaneos": 67,
-  "escala_pico_H1_Mpc": 12.121212121212121
+  "num_galaxias_amostra": 7919,
+  "max_aneis_H1_simultaneos": 253,
+  "escala_pico_H1_Mpc": 3.0303030303030303
 }

@@ -44,7 +44,7 @@ def main():
     
     # 2. Filtrar coordenadas válidas e amostrar (TDA em 3D é pesado)
     df = df.dropna(subset=['x_mpc', 'y_mpc', 'z_mpc'])
-    N_AMOSTRA = 1500 # Amostragem para manter o cálculo rápido na CPU
+    N_AMOSTRA = 7919 # Amostragem para manter o cálculo rápido na CPU
     if len(df) > N_AMOSTRA:
         df_amostra = df.sample(n=N_AMOSTRA, random_state=42)
     else:
@@ -52,8 +52,8 @@ def main():
         
     print(f"[+] Amostra para TDA: {len(df_amostra)} galáxias")
     
-    # Extrair coordenadas 3D
-    X = df_amostra[['x_mpc', 'y_mpc', 'z_mpc']].values
+    # Extrair coordenadas 2D (Achatando a nuvem para aumentar a densidade aparente)
+    X = df_amostra[['x_mpc', 'y_mpc']].values
     
     # 3. Calcular Homologia Persistente com Ripser
     print("[+] Calculando Homologia Persistente (H0 e H1)... (Isso pode levar 1-2 minutos)")

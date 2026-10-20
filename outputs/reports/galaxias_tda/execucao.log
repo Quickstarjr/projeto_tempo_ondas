@@ -1,6 +1,6 @@
 === LOG DE EXECUÇÃO ===
 Data: 2026-10-20
 Entrada: outputs/reports/galaxias_tamanho/dados.csv
-Galáxias processadas na TDA: 1500
-Pico de H1: 67 anéis em ε=12.1 Mpc
+Galáxias processadas na TDA: 7919
+Pico de H1: 253 anéis em ε=3.0 Mpc
 Objetivo: Medir a topologia da Cosmic Web para validar os nós de Chladni.
