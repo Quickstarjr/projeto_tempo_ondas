@@ -169,6 +169,27 @@ Após o falso positivo de SNR=41.31 (20 pulsares, parâmetros de ruído fixos), 
 - **MCMC Local (2 pulsares):** Rodar o script `pipeline_mcmc_local.py` na CPU local para verificar se o SNR cai de valores inflados para a faixa 0.5–3.0.
 - **Reanálise com mais bins angulares:** A análise simplificada inicial usou 10 bins. O Gepeto sugeriu aumentar para 20 bins (ou mais) para melhorar a resolução da curva de correlação vs θ. Isso pode revelar estrutura que os 10 bins suavizaram.
 - **Documentação da "Crônica da Falha do Colab":** Registrar no `Gemini.md` e no `CHANGELOG.md` que o Colab gratuito não é viável para este pipeline, como lição de infraestrutura.
+
+---
+
+# PARTE 6: CRÔNICA DA BATALHA DO MCMC E LIMITAÇÕES DE HARDWARE
+**Data:** 19 de outubro de 2026
+
+## 15. A TENTATIVA DE MARGINALIZAÇÃO E O FALSO POSITIVO
+Após o resultado de SNR=41.31 (20 pulsares, parâmetros de ruído fixos), a equipe se dedicou a implementar a marginalização via MCMC para corrigir o viés. O objetivo era provar que, ao permitir que os parâmetros de ruído variassem, o SNR inflado cairia para um valor realista (esperado entre 1 e 5).
+
+**O percurso da "Batalha do MCMC":**
+1.  **Google Colab:** A tentativa de usar a nuvem (GPU Tesla T4) falhou repetidamente por *Out of Memory* (OOM), com o limite de 12.7 GB de RAM sendo insuficiente para o `discovery`/JAX.
+2.  **WSL2 Local (CPU):** O ambiente local foi configurado para rodar o MCMC na CPU, forçando o JAX a não usar a GPU e a não estourar a memória.
+3.  **Batalha das Dependências:** Foram necessárias várias iterações para resolver conflitos e instalar as bibliotecas corretas (`mpi4py`, `mpi4jax`, `openmpi`), garantindo que o `discovery` conseguisse iniciar o sampler.
+
+## 16. RESULTADO FINAL DO MCMC E CONCLUSÃO
+Mesmo com todas as dependências resolvidas, a execução do MCMC com 2 pulsares na CPU da máquina local (i7-2600) resultou em uma **taxa de aceitação de 0%**. Isso indica que o sampler não conseguiu encontrar um "passo" válido no espaço de parâmetros, um sintoma claro da "maldição da dimensionalidade" e da insuficiência de recursos computacionais para uma exploração eficiente.
+
+**Conclusão do Grupo (Proposta Gepeto):**
+A limitação de hardware (CPU de 2011 e GPU com 4 GB) é um gargalo real. A implementação completa do MCMC com marginalização de ruído para os 68 pulsares do NANOGrav é inviável nesta máquina. O foco do projeto será, portanto, redirecionado para:
+- **Documentação Metodológica:** Registrar todo o processo de validação, incluindo a identificação do falso positivo (SNR=41) e a incapacidade de rodar o MCMC completo.
+- **Análise Teórica e Topológica:** Avançar na "Gaveta Filosófica" e na "Gaveta de Física", explorando as analogias com as Figuras de Chladni e a superposição de frequências, que podem ser testadas com ferramentas de TDA em um futuro com mais recursos.
 ============================================================
 FIM DO REGISTRO
 ============================================================

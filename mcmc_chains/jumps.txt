@@ -1,0 +1,2 @@
+covarianceJumpProposalAM  0.5
+covarianceJumpProposalSCAM  0.5

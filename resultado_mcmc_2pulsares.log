@@ -1,0 +1,12 @@
+/home/quick/miniforge3/envs/pta/lib/python3.13/site-packages/jaxlib/plugin_support.py:91: RuntimeWarning: JAX plugin jax_cuda12_plugin version 0.11.2 is installed, but it is not compatible with the installed jaxlib version 0.10.2, so it will not be used.
+  warnings.warn(
+=== [1/5] CARREGANDO 2 PULSARES (FEATHER) ===
+[+] Carregados: ['B1855+09.feather', 'B1937+21.feather']
+
+=== [2/5] CONSTRUINDO GLOBAL LIKELIHOOD (SEM NOISEDICT FIXO) ===
+
+=== [3/5] CONFIGURANDO O MCMC (SEM MPI) ===
+
+=== [4/5] RODANDO MCMC COM 1000 ITERAÇÕES NA CPU ===
+(Isso vai demorar. Acompanhe com tail -f)
+Finished 0.00 percent in 0.017894 s Acceptance rate = 0
