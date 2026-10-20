@@ -2,7 +2,18 @@
 ---
 
 ### 2. `CHANGELOG.md`
+## [Não lançado] - 2026-10-20
 
+### Adicionado
+- **Análise Estelar:** Criação do kit de experimentos para a estrela KIC 757450 usando `lightkurve` (curva de luz, Lomb-Scargle e BLS).
+- **Análise de Galáxias:** Download de ~8.000 galáxias do SDSS (SpecPhoto) e análise de espectro de potência.
+- **Teste de Chladni Cósmico:** Experimento de segregação de massa (`galaxias_tamanho.py`), confirmando visualmente os filamentos (nós) e vazios (ventres) com galáxias massivas e anãs.
+- **Documentação de Ambiente:** Criação do `ambiente_v2.md` contendo todas as bibliotecas de astronomia, GPU e limitações do MCMC.
+- **Nomenclatura Formal:** Renomeação dos arquivos de membros do grupo (`DeepSeek.md`, `Google_Gemini.md`, `OpenAI_GPT.md`, `xAI_Grok.md`).
+
+### Corrigido
+- **SDSS Redshift:** Correção do bug de sobrescrita da coluna `z` no script de galáxias.
+- **Filtro de Dados:** Adição do filtro `modelMag_r > 0` para ignorar dados ausentes (`-9999.0`) no SDSS.
 ```markdown
 # CHANGELOG — Projeto Tempo, Ondas e Observador
 
