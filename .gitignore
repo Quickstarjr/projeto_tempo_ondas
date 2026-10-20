@@ -24,4 +24,4 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
-git rm -r --cached discovery
+discovery/
