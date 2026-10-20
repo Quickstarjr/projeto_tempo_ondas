@@ -298,7 +298,27 @@ Serve como analogia qualitativa para a distribuição de matéria na cosmic web 
 - Experimentos em microgravidade: PK-3 Plus e PK-4 (ISS)
 - Literatura de voids: Morfill, Goree, Tsytovich e colaboradores
 - Revisões de complex plasmas sob microgravidade
+==============================================================================
+ESTUDOS DE REFERÊNCIA: SEGREGAÇÃO DE MASSA / GALAXY BIAS (CHLADNI CÓSMICO)
+==============================================================================
+Autor da Hipótese: Quickstar
+Data: 20 de Outubro de 2026
 
+Analogia Experimental:
+  - Na placa de Chladni, grãos com massas e tamanhos diferentes possuem 
+    tempos de relaxação e tempos de resposta inercial distintos, acomodando-se 
+    em nós com geometrias diferentes.
+
+Correspondência na LSS (SDSS):
+  - Galáxias Massivas/Gigantes (Grãos Pesados) possuem alto Viés (Galaxy Bias b > 2),
+    traçando exclusivamente os super-nós e interseções primárias de alta densidade.
+  - Galáxias Anãs/Leves (Grãos Finos) traçam as linhas nodais secundárias, 
+    filamentos finos e contornos dos vazios ( voids ).
+
+Aplicação:
+  - Filtrar catálogos por magnitude/massa antes de extrair a correlação de fase 
+    e as Curvas de Betti revela a hierarquia nodal do campo de densidade primordial.
+==============================================================================
 ### Status no projeto
 Catalogado na Gaveta de Física como referência experimental terrestre. Não constitui evidência da hipótese da Grande Onda; serve apenas como analogia e fonte de padrões possíveis a serem comparados com dados cosmológicos.
 
