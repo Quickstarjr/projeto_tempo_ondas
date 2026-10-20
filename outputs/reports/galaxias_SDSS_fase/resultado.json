@@ -1,0 +1,8 @@
+{
+  "amostra": "SDSS",
+  "num_galaxias": 7998,
+  "redshift_min": -19.094510616562783,
+  "redshift_max": 72.49071870878376,
+  "dist_min_mpc": 211.82359203138307,
+  "dist_max_mpc": 418.44729848000514
+}

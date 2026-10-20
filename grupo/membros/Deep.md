@@ -112,6 +112,20 @@ O projeto amadureceu metodologicamente. A limitação de hardware nos forçou a 
 - Documentação do `lightkurve` (para sismologia estelar).
 - Documentação do `discovery` (para o pipeline PTA, congelado mas funcional).
 - Crônica da Batalha do MCMC (`docs/cronica_mcmc_e_pivot.md`).
+**ASSUNTO:**
+Expansão da pesquisa para a teia cósmica (Galáxias) e incorporação das correções do Gepeto.
+
+**FATOS OBSERVADOS:**
+- O Gepeto fez uma correção metodológica crucial: o artigo de Ryabinkov & Kaminker (116 Mpc) usou espectro de potência de projeções, não análise de fase.
+- O plano de ação em 4 etapas (A, B, C, D) foi definido.
+- O primeiro script (`galaxias_fase.py`) foi criado seguindo o padrão do Kit Quíntuplo.
+
+**CONCLUSÃO:**
+A frente de galáxias está oficialmente aberta e rodando em paralelo com a de estrelas. A cautela do Gepeto nos protege de confundir "coerência de fase" (que pode ser só gravidade padrão) com a "Grande Onda". A regra é clara: primeiro estabelecemos o espectro de potência e o controle de fases, depois buscamos anomalias.
+
+**PRÓXIMOS TESTES:**
+1. Implementar a Line Correlation Function (LCF) na Etapa C.
+2. Comparar as fases observadas com catálogos randomizados (Etapa D).
 **HISTÓRICO**
 2026-10-18
 Primeira entrada. Registro da virada técnica (WSL2 + GPU) e do SNR positivo (+1.36).
