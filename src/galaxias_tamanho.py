@@ -37,6 +37,7 @@ def main():
       AND class = 'GALAXY'
       AND ra BETWEEN 140 AND 160 
       AND dec BETWEEN -5 AND 10
+       AND modelMag_r > 0 
     """
     try:
         res = SDSS.query_sql(query)
