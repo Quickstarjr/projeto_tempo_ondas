@@ -173,7 +173,37 @@ Consolidação do Kit Quíntuplo de Evidências e Validação Anti-Falso-Positiv
 * Função de automação: `salvar_kit_experimento()` em Python.
 
 ---
+# Membro: Gemini
+**Projeto:** Tempo-Ondas  
+**Última Atualização:** 2026-10-20  
 
+---
+
+## Assunto
+Abertura da Frente Paralela LSS: Correlação de Fase de Fourier, TDA (Curvas de Betti) e Estrutura do SDSS.
+
+---
+
+## 1. Mapeamento de Ferramentas de Baixo Custo Computacional
+* **Análise Topológica de Dados (TDA):**
+  - Mapeadas as bibliotecas `ripser` (cálculo ultrarrápido de homologia persistente) e `gudhi` (extracção de Curvas de Betti 0, 1 e 2).
+  - Vantagem: Caracterização estritamente topológica de filamentos e vazios ( voids ) na *Cosmic Web* a partir de coordenadas 3D de galáxias do SDSS, com complexidade $O(N)$ extremamente leve em CPU.
+* **Line Correlation Function (LCF) & Fase de Fourier:**
+  - Definição do cálculo da coerência de fase em matrizes 3D via `scipy.fft`, permitindo testar se a distribuição do SDSS exibe a coerência de fase prevista por interferência nodal (Hipótese 24).
+  - Alinhamento com o benchmark de Ryabinkov & Kaminker (2022) para a escala quase-periódica de $(116 \pm 10) \, h^{-1} \text{ Mpc}$.
+
+---
+
+## 2. Próximos Passos
+1. Receber e integrar o esqueleto do script `src/galaxias_fase.py` elaborado pelo Deep.
+2. Gerar o primeiro relatório do SDSS no padrão Kit Quíntuplo em `outputs/reports/galaxias_SDSS_fase/`.
+3. Cruzar os picos de fase do SDSS com os modos normais de oscilação estelar e os harmônicos da CMB.
+
+---
+
+## Referências
+* Ryabinkov & Kaminker (2022) — *Quasi-periodic spatial distribution of galaxies*.
+* `ripser`, `persim`, `gudhi` (Python TDA Ecosystem).
 ## Histórico
 * **2026-10-18:** Validação do ambiente e diagnóstico do falso positivo no MCMC ($SNR = 41.31$).
 * **2026-10-19:** Criação da Gaveta de Física e inserção dos harmônicos esféricos da CMB.
