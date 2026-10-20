@@ -84,6 +84,34 @@ Cada membro deve contribuir com pelo menos um experimento real ou fenômeno fís
 
 **FEEDBACK SOBRE A IDEIA DO GEPETO:**
 A separação entre Gaveta Filosófica (intuição) e Gaveta de Física (referência experimental) é o que garante que a nossa especulação tenha lastro na realidade.
+**ASSUNTO:**
+A Virada Científica: Fim da Batalha do MCMC, criação do "Kit Quíntuplo" e a Destruição do Falso Positivo da Estrela KIC 757450.
+
+**DADOS / FATOS OBSERVADOS:**
+1. O MCMC local falhou (0% de aceitação) por limitação do hardware (i7-2600 + HDD).
+2. O grupo pivotou para análises de baixo custo computacional.
+3. O "Kit Quíntuplo" (CSV, JSON, LOG, PNG, MD) foi implementado no Git para garantir que todos os membros (mesmo com limitações visuais) possam auditar os dados.
+4. O sinal de 18.8 dias na estrela KIC 757450 (via BLS) foi testado por *Phase Folding* com todos os quarters do Kepler. O resultado foi uma nuvem de ruído sem estrutura, refutando a hipótese de trânsito planetário.
+
+**CONCLUSÃO:**
+O projeto amadureceu metodologicamente. A limitação de hardware nos forçou a abandonar a "força bruta" (MCMC) e adotar o "rigor elegante" (análise de séries temporais, sismologia estelar, TDA e modelos Toy). Além disso, o ceticismo científico está funcionando perfeitamente: destruímos um falso positivo de SNR=41 (PTA) e um falso positivo de trânsito planetário (Kepler) antes de qualquer anúncio equivocado.
+
+**PONTOS IMPORTANTES / CRÍTICAS:**
+- A Grokinha foi cirúrgica ao notar que 33 dias de observação eram insuficientes para confirmar um período de 18.8 dias (< 2 ciclos).
+- O Gemini nos deu a infraestrutura perfeita para automação de relatórios.
+- O Gepeto (quando voltar do castigo) deve auditar a fundo essa refutação estelar.
+
+**HIPÓTESES / IDEIAS:**
+- **H-GW2 (Múltiplos Modos):** A complexidade da curva de luz da KIC 757450 (rotação + manchas + ruído) é um análogo em miniatura da "música estelar". Se uma única estrela tem um espectro de frequências tão complexo, a Grande Onda cósmica (se existir) também deve ter.
+
+**PRÓXIMOS TESTES SUGERIDOS:**
+1. Padronizar o `estrela_avancada.py` para gerar o Kit Quíntuplo completo (CSV da curva dobrada, JSON com a refutação).
+2. Retomar os estudos de Chladni 3D e TDA (como o Gepeto sugeriu), rodando simulações leves de superposição de frequências e medindo a topologia com `gudhi` ou `ripser`.
+
+**REFERÊNCIAS IMPORTANTES:**
+- Documentação do `lightkurve` (para sismologia estelar).
+- Documentação do `discovery` (para o pipeline PTA, congelado mas funcional).
+- Crônica da Batalha do MCMC (`docs/cronica_mcmc_e_pivot.md`).
 **HISTÓRICO**
 2026-10-18
 Primeira entrada. Registro da virada técnica (WSL2 + GPU) e do SNR positivo (+1.36).
