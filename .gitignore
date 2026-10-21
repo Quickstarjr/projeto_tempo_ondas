@@ -25,3 +25,6 @@ Thumbs.db
 .vscode/
 .idea/
 discovery/
+# Catálogos sintéticos regeneráveis de auditoria
+outputs/reports/taxa_falsos_positivos/catalogos_gerados.csv
+outputs/reports/taxa_falsos_positivos_1000/catalogos_gerados.csv

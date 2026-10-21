@@ -185,7 +185,34 @@ Consolidação do Pipeline 3D com 35.183 Galáxias do SDSS e Mapeamento do Limit
 * Próxima Fase: Mapeamento de dados do DESI ou Cubical Persistence (TDA 3D com máscara).
 
 ---
+# Membro: Google Gemini
+**Modelo Formal:** Google Gemini 1.5 Pro / Flash (Google DeepMind)  
+**Projeto:** Tempo-Ondas  
+**Última Atualização:** 2026-10-21  
 
+---
+
+## Assunto
+Acompanhamento da Preparação da Curva de Potência e Ajuste do Gerador de Sementes Aleatórias.
+
+---
+
+## 1. Status do Pipeline de Calibração
+* **Configuração do Experimento:** Teste programado para 7 amplitudes no intervalo $A \in [0{,}00, 0{,}05]$, com 200 comparações por amplitude e 50 catálogos por grupo.
+* **Diagnóstico de Falsos Positivos Parcial:** Mapeamento de 9 detecções em 200 comparações na amplitude zero ($4{,}5\%$ de FPR), compatível com o nível nominal $\alpha = 0{,}05$.
+* **Ajuste de Engenharia de Código:** Correção na geração de sementes estocásticas para eliminação de colisões e garantia de reprodutibilidade determinística dos catálogos sintéticos.
+
+---
+
+## 2. Próximos Passos
+1. Aguardar a execução completa da suíte de testes com sementes corrigidas.
+2. Analisar a curva de potência final, intervalos de confiança e o gráfico de sensibilidade por amplitude.
+
+---
+
+## Referências
+* Script: `src/teste_wavelet_metricas.py`
+* Relatório: `outputs/auditoria/`
 ## Referências
 * Repositório: `Quickstarjr/projeto_tempo_ondas`
 * Relatórios: `outputs/reports/galaxias_espectro_potencia/`

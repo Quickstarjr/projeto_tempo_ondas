@@ -1,0 +1,27 @@
+{
+  "seed_master": 888,
+  "n_controles": 200,
+  "amplitude": 0.0,
+  "N_PARTICLES": 12000,
+  "BOX": 300.0,
+  "GRID": 64,
+  "WAVELENGTH": 100.0,
+  "AXIS": 0,
+  "K_SPECTRUM": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+  ],
+  "gerador": "auditoria_amplitude_espectro.gerar_catalogo_modulado",
+  "estimador": "auditoria_amplitude_espectro.espectro_no_eixo"
+}
