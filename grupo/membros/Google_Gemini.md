@@ -110,7 +110,91 @@ Confirmação Estatística do Galaxy Bias no SDSS via cKDTree (`outputs/reports/
 3. Aplicar Transformada de Wavelet no campo 3D para isolar o pico espectral em $\sim 100 - 150\text{ Mpc}$.
 
 ---
+# Membro: Google Gemini
+**Modelo Formal:** Google Gemini 1.5 Pro / Flash (Google DeepMind)  
+**Projeto:** Tempo-Ondas  
+**Última Atualização:** 2026-10-21  
 
+---
+
+## Assunto
+Implementação do Teste Sintético v2 (`teste_wavelet_sintetico_v2.py`) com Convolução de Kernel 2D Mexican Hat (Ricker).
+
+---
+
+## 1. Evolução do Pipeline de Processamento de Sinal
+* **Descarte da Wavelet de Haar (`db1` / `wavedec2`):** Identificado que a natureza descontínua e quadrada da base Haar gerava retalhamento em blocos e ruído de borda, incapaz de recuperar padrões radiais suaves de Chladni.
+* **Adoção do Kernel 2D Mexican Hat ($\nabla^2 G$):** Implementação via convolução espacial para isolar picos isotrópicos (aglomerados/bolhas) e cristas contínuas (filamentos/anéis).
+* **Controle de Falsos Positivos (Proposta Gepeto):** Validação do kernel em dois cenários sintéticos controlados: (1) Padrão Nodal de Chladni com ruído, e (2) Campo de manchas aleatórias (para verificação de falso alinhamento).
+
+---
+
+## 2. Próximos Passos
+1. Auditar os mapas de resposta e o Kit Quíntuplo em `outputs/reports/teste_wavelet_sintetico_v2/`.
+2. Extrapolar a convolução de Mexican Hat para o volume 3D ($\rho(\vec{x})$ por KDE) do SDSS.
+3. Cruzar a escala dos picos de energia com o resultado permutado nulo.
+
+---
+# Membro: Google Gemini
+**Modelo Formal:** Google Gemini 1.5 Pro / Flash (Google DeepMind)  
+**Projeto:** Tempo-Ondas  
+**Última Atualização:** 2026-10-21  
+
+---
+
+## Assunto
+Execução das Métricas Quantitativas de SNR e Aprovação do Pipeline Duplo no KDE (`src/galaxias_kde_wavelet.py`).
+
+---
+
+## 1. Protocolo de Validação Final do Instrumento
+* **Métricas de SNR (`src/teste_wavelet_metricas.py`):** Extração da Razão Sinal-Ruído da resposta do kernel Mexican Hat em dados sintéticos para chancela quantitativa de detecção.
+* **Pipeline Duplo Real vs. Permutado (KDE + Wavelet):** Adesão ao plano da Grokinha para aplicar o KDE no catálogo do SDSS em paralelo com o controle nulo aleatorizado, isolando artefatos de janela e amostragem.
+
+---
+
+## 2. Próximos Passos
+1. Registrar a métrica de SNR calculada pelo `src/teste_wavelet_metricas.py` no relatório.
+2. Auditar os mapas de densidade e perfis de escala de `outputs/reports/galaxias_kde_wavelet/`.
+3. Validar a presença da escala de $\sim 100 - 150 \text{ Mpc}$ exclusivamente na matriz real.
+
+---
+# Membro: Google Gemini
+**Modelo Formal:** Google Gemini 1.5 Pro / Flash (Google DeepMind)  
+**Projeto:** Tempo-Ondas  
+**Última Atualização:** 2026-10-21  
+
+---
+
+## Assunto
+Consolidação do Pipeline 3D com 35.183 Galáxias do SDSS e Mapeamento do Limite de Sensibilidade à BAO.
+
+---
+
+## 1. Síntese do Encerramento de Fase
+* **Escalabilidade Computacional:** Sucesso na execução da FFT 3D e do Espectro de Potência $P(k)$ sobre a amostra expandida de 35.183 galáxias, com tempo de execução otimizado.
+* **Mapeamento de Agrupamento Gravitacional:** Confirmação do excesso de potência nos dados reais sobre o modelo de controle nulo em todas as escalas operacionais.
+* **Diagnóstico de Limite de Amostragem (BAO):** Identificação de que o sinal oscilatório de $\sim 1\%$ da BAO em $k \sim 0{,}0628 \text{ Mpc}^{-1}$ exige catálogos massivos (ordem de $10^6$ objetos, ex: DESI/eBOSS) e integração da máscara angular formal para superação da variância cósmica.
+
+---
+
+## 2. Status dos Entregáveis (Git)
+* Pipeline de Wavelets (Mexican Hat): **Calibrado e Aprovado**
+* Teste de Permutação (Galaxy Bias): **Confirmado ($p < 0,01$)**
+* FFT 3D / Espectro de Potência: **Operacional**
+* Próxima Fase: Mapeamento de dados do DESI ou Cubical Persistence (TDA 3D com máscara).
+
+---
+
+## Referências
+* Repositório: `Quickstarjr/projeto_tempo_ondas`
+* Relatórios: `outputs/reports/galaxias_espectro_potencia/`
+## Referências
+* Scripts: `src/teste_wavelet_metricas.py` e `src/galaxias_kde_wavelet.py`
+* Relatórios: `outputs/reports/`
+## Referências
+* Script: `src/teste_wavelet_sintetico_v2.py`
+* Relatório: `outputs/reports/teste_wavelet_sintetico_v2/`
 ## Referências
 * Script: `src/galaxias_estatistica_massa.py`
 * Relatório: `outputs/reports/galaxias_estatistica_massa/`
