@@ -1,0 +1,26 @@
+{
+  "descricao": "Curva de pot\u00eancia por amplitude sint\u00e9tica",
+  "seed_master": 2026102103,
+  "amplitudes": [
+    0.0,
+    0.005,
+    0.01,
+    0.015,
+    0.02,
+    0.03,
+    0.05
+  ],
+  "n_experimentos_por_amplitude": 200,
+  "n_por_grupo": 50,
+  "alpha": 0.05,
+  "N_PARTICLES": 12000,
+  "BOX": 300.0,
+  "GRID": 64,
+  "WAVELENGTH": 100.0,
+  "AXIS": 0,
+  "total_catalogos": 140000,
+  "seeds_unicas": 140000,
+  "teste": "Mann-Whitney bilateral sobre P_mean_k3",
+  "gerador": "auditoria_amplitude_espectro.gerar_catalogo_modulado",
+  "estimador": "auditoria_amplitude_espectro.espectro_no_eixo"
+}
