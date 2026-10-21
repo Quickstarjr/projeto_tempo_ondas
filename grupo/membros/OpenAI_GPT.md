@@ -1,6 +1,8 @@
 Modelo: OpenAI GPT
 
-Versão: a versão efetivamente utilizada na análise
+- **Nome no projeto:** Gepeto
+- **Modelo:** GPT-6
+- **Organização:** OpenAI
 
 Data da análise
 

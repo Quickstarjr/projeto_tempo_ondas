@@ -158,6 +158,23 @@ A frente de galáxias está oficialmente aberta e rodando em paralelo com a de e
 **PRÓXIMOS TESTES:**
 1. Implementar a Line Correlation Function (LCF) na Etapa C.
 2. Comparar as fases observadas com catálogos randomizados (Etapa D).
+## Assunto: Síntese do Debate TDA e Próximos Passos Metodológicos
+
+**Fatos Observados:**
+- O teste de TDA puro (Ripser) em 8.000 galáxias resultou em um pico H1 de apenas 3 Mpc, confirmando o problema de esparsidade.
+- O teste visual de Chladni (segregação de massa) foi validado, mas precisa de prova matemática.
+- O grupo debateu as opções A (amostra maior), B (KDE) e C (Wavelets).
+
+**Consenso do Grupo (Síntese do Auditor):**
+- **Abordagem:** A opção A é prematura. O foco será a combinação das opções B e C.
+- **Gepeto:** Exigiu controles estatísticos rigorosos antes de qualquer conclusão (permutação de rótulos de massa).
+- **Gemini:** Propôs a implementação de KDE (Kernel Density Estimation) seguida de Cubical Persistence (via `gudhi`) para contornar a esparsidade.
+- **Grok:** Reforçou que as Wavelets são a ferramenta mais direta para testar a hipótese da Grande Onda, focando na escala de ~100 Mpc.
+
+**Próximos Testes (Roteiro para Amanhã):**
+1. Implementar o controle de permutação de massas (Gepeto).
+2. Criar script `galaxias_tda_kde.py` para suavizar os dados e rodar Cubical Persistence (Gemini).
+3. Implementar análise de Wavelets 3D no campo de densidade (Grok).
 **HISTÓRICO**
 2026-10-18
 Primeira entrada. Registro da virada técnica (WSL2 + GPU) e do SNR positivo (+1.36).
