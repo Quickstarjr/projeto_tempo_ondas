@@ -1,0 +1,212 @@
+{
+  "input": "outputs/reports/galaxias_tamanho/dados.csv",
+  "n_objects": 7919,
+  "n_permutations": 5000,
+  "seed": 20261022,
+  "thresholds": [
+    18.0,
+    18.5,
+    19.0,
+    19.5,
+    20.0,
+    21.0,
+    22.0
+  ],
+  "offsets": [
+    0.0,
+    0.25,
+    0.5,
+    0.75
+  ],
+  "min_cell_n": 100,
+  "border_definition": "Exclui primeira e última linha e coluna de cada grade; mantém somente células com N >= MIN_CELL_N.",
+  "all_cells": {
+    "observed": {
+      "amplitude": 0.13664596273291924,
+      "threshold": 18.0,
+      "ra_offset": 0.25,
+      "dec_offset": 0.5,
+      "min_rate": 0.006211180124223602,
+      "max_rate": 0.14285714285714285,
+      "n_eligible_cells": 15
+    },
+    "null_median": 0.05017338419335804,
+    "null_q95": 0.07012795521567453,
+    "null_q99": 0.08044958011280151,
+    "global_p_value": 0.0001999600079984003,
+    "mc_se_approx": 0.00019994001499650077,
+    "n_null_ge_observed": 0
+  },
+  "interior_only": {
+    "observed": {
+      "amplitude": 0.02494802494802495,
+      "threshold": 18.0,
+      "ra_offset": 0.5,
+      "dec_offset": 0.75,
+      "min_rate": 0.017094017094017096,
+      "max_rate": 0.042042042042042045,
+      "n_eligible_cells": 6
+    },
+    "null_median": 0.02409474905677652,
+    "null_q95": 0.03321550148924889,
+    "null_q99": 0.03778690900535597,
+    "global_p_value": 0.42131573685262946,
+    "mc_se_approx": 0.006982263740736383,
+    "n_null_ge_observed": 2106
+  },
+  "grids": [
+    {
+      "ra_offset": 0.0,
+      "dec_offset": 0.0,
+      "n_ra": 4,
+      "n_dec": 3,
+      "n_all_eligible": 12,
+      "n_inner_eligible": 2,
+      "total_objects": 7919
+    },
+    {
+      "ra_offset": 0.0,
+      "dec_offset": 0.25,
+      "n_ra": 4,
+      "n_dec": 4,
+      "n_all_eligible": 12,
+      "n_inner_eligible": 4,
+      "total_objects": 7919
+    },
+    {
+      "ra_offset": 0.0,
+      "dec_offset": 0.5,
+      "n_ra": 4,
+      "n_dec": 4,
+      "n_all_eligible": 13,
+      "n_inner_eligible": 4,
+      "total_objects": 7919
+    },
+    {
+      "ra_offset": 0.0,
+      "dec_offset": 0.75,
+      "n_ra": 4,
+      "n_dec": 4,
+      "n_all_eligible": 16,
+      "n_inner_eligible": 4,
+      "total_objects": 7919
+    },
+    {
+      "ra_offset": 0.25,
+      "dec_offset": 0.0,
+      "n_ra": 5,
+      "n_dec": 3,
+      "n_all_eligible": 14,
+      "n_inner_eligible": 3,
+      "total_objects": 7919
+    },
+    {
+      "ra_offset": 0.25,
+      "dec_offset": 0.25,
+      "n_ra": 5,
+      "n_dec": 4,
+      "n_all_eligible": 15,
+      "n_inner_eligible": 6,
+      "total_objects": 7919
+    },
+    {
+      "ra_offset": 0.25,
+      "dec_offset": 0.5,
+      "n_ra": 5,
+      "n_dec": 4,
+      "n_all_eligible": 15,
+      "n_inner_eligible": 6,
+      "total_objects": 7919
+    },
+    {
+      "ra_offset": 0.25,
+      "dec_offset": 0.75,
+      "n_ra": 5,
+      "n_dec": 4,
+      "n_all_eligible": 18,
+      "n_inner_eligible": 6,
+      "total_objects": 7919
+    },
+    {
+      "ra_offset": 0.5,
+      "dec_offset": 0.0,
+      "n_ra": 5,
+      "n_dec": 3,
+      "n_all_eligible": 15,
+      "n_inner_eligible": 3,
+      "total_objects": 7919
+    },
+    {
+      "ra_offset": 0.5,
+      "dec_offset": 0.25,
+      "n_ra": 5,
+      "n_dec": 4,
+      "n_all_eligible": 15,
+      "n_inner_eligible": 6,
+      "total_objects": 7919
+    },
+    {
+      "ra_offset": 0.5,
+      "dec_offset": 0.5,
+      "n_ra": 5,
+      "n_dec": 4,
+      "n_all_eligible": 16,
+      "n_inner_eligible": 6,
+      "total_objects": 7919
+    },
+    {
+      "ra_offset": 0.5,
+      "dec_offset": 0.75,
+      "n_ra": 5,
+      "n_dec": 4,
+      "n_all_eligible": 17,
+      "n_inner_eligible": 6,
+      "total_objects": 7919
+    },
+    {
+      "ra_offset": 0.75,
+      "dec_offset": 0.0,
+      "n_ra": 5,
+      "n_dec": 3,
+      "n_all_eligible": 15,
+      "n_inner_eligible": 3,
+      "total_objects": 7919
+    },
+    {
+      "ra_offset": 0.75,
+      "dec_offset": 0.25,
+      "n_ra": 5,
+      "n_dec": 4,
+      "n_all_eligible": 15,
+      "n_inner_eligible": 6,
+      "total_objects": 7919
+    },
+    {
+      "ra_offset": 0.75,
+      "dec_offset": 0.5,
+      "n_ra": 5,
+      "n_dec": 4,
+      "n_all_eligible": 14,
+      "n_inner_eligible": 6,
+      "total_objects": 7919
+    },
+    {
+      "ra_offset": 0.75,
+      "dec_offset": 0.75,
+      "n_ra": 5,
+      "n_dec": 4,
+      "n_all_eligible": 18,
+      "n_inner_eligible": 6,
+      "total_objects": 7919
+    }
+  ],
+  "elapsed_seconds": 27.64418649673462,
+  "caveats": [
+    "Análise exploratória; parâmetros foram examinados previamente.",
+    "Permutação das magnitudes dentro de estratos de redshift.",
+    "A máscara real do levantamento e a completude não são conhecidas.",
+    "Excluir bordas da grade não equivale a corrigir a máscara do céu.",
+    "RA/DEC retangular não representa áreas esféricas iguais.",
+    "Valor-p não demonstra uma onda cosmológica."
+  ]
+}

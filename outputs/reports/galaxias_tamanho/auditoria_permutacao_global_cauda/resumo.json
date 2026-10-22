@@ -1,0 +1,50 @@
+{
+  "input": "outputs/reports/galaxias_tamanho/dados.csv",
+  "n_objects": 7919,
+  "thresholds": [
+    18.0,
+    18.5,
+    19.0,
+    19.5,
+    20.0,
+    21.0,
+    22.0
+  ],
+  "n_grid_positions": 16,
+  "offsets": [
+    0.0,
+    0.25,
+    0.5,
+    0.75
+  ],
+  "min_cell_n": 100,
+  "n_permutations": 5000,
+  "seed": 20261022,
+  "observed_global": {
+    "amplitude": 0.04577305880667922,
+    "threshold": 18.0,
+    "ra_offset": 0.5,
+    "dec_offset": 0.0,
+    "min_rate": 0.015130674002751032,
+    "max_rate": 0.060903732809430254,
+    "n_eligible_cells": 12
+  },
+  "null_median": 0.04150047483380817,
+  "null_q95": 0.060871447393186534,
+  "null_q99": 0.07262111888245273,
+  "global_p_value": 0.3249350129974005,
+  "monte_carlo_se_approx": 0.006622814940009272,
+  "strata_sizes": [
+    786,
+    1588,
+    1762,
+    1563,
+    2220
+  ],
+  "caveats": [
+    "Teste exploratório; limiares e grades foram escolhidos após inspeção anterior dos dados.",
+    "Permutação condicionada a faixas de redshift; não controla máscara, completude, extinção ou qualidade fotométrica.",
+    "A grade é uma partição angular retangular, não uma área celeste uniforme.",
+    "Um valor-p pequeno não demonstra uma onda cosmológica."
+  ]
+}

@@ -28,3 +28,7 @@ discovery/
 # Catálogos sintéticos regeneráveis de auditoria
 outputs/reports/taxa_falsos_positivos/catalogos_gerados.csv
 outputs/reports/taxa_falsos_positivos_1000/catalogos_gerados.csv
+
+# Backups locais de scripts (não versionar)
+*.py.bak
+*.py.pre_correcao

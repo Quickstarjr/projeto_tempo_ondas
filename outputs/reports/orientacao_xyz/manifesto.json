@@ -1,0 +1,26 @@
+{
+  "experimento": "orientacao_xyz",
+  "status": "sintetico; não constitui evidência cosmológica",
+  "N_PARTICLES": 12000,
+  "BOX": 300.0,
+  "GRID": 64,
+  "WAVELENGTH": 100.0,
+  "AMPLITUDE": 0.1,
+  "REPS_por_condicao": 200,
+  "SEED_MASTER": 20261022,
+  "alpha_nominal": 0.05,
+  "condicoes": [
+    "nulo_A0",
+    "sinal_X",
+    "sinal_Y",
+    "sinal_Z"
+  ],
+  "total_catalogos": 800,
+  "metrica": "potência FFT axial média dos modos conjugados no k-alvo",
+  "janela": "Hann separável 3D",
+  "teste_nulo_eixos": "Wilcoxon pareado dentro de cada catálogo",
+  "teste_sinal_vs_nulo": "Mann–Whitney bilateral; grupos independentes",
+  "python": "3.13.16",
+  "numpy": "2.5.4",
+  "pandas": "2.3.3"
+}
