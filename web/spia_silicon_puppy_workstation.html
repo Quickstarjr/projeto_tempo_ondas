@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SPIA - Silicon Puppy Lab Workstation | Projeto Tempo-Ondas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              500: '#10b981',
+              600: '#059669',
+              900: '#064e3b',
+            },
+            cyber: {
+              bg: '#090d16',
+              panel: '#0f172a',
+              border: '#1e293b',
+              accent: '#10b981',
+              cyan: '#06b6d4',
+              orange: '#f97316'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090d16;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #10b981;
+    }
+    .terminal-cursor::after {
+      content: '▋';
+      animation: blink 1s step-start infinite;
+      color: #10b981;
+    }
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col font-sans overflow-hidden select-none bg-cyber-bg text-slate-200">
+
+  <!-- Top Navigation / Status Header -->
+  <header class="h-11 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-3 text-xs shrink-0 z-20">
+    <div class="flex items-center space-x-3">
+      <button id="toggleSidebarBtn" title="Alternar Árvore de Arquivos (Ctrl+B)" class="p-1.5 hover:bg-slate-800 text-slate-400 hover:text-emerald-400 rounded transition-colors">
+        <i class="fa-solid fa-bars-staggered text-sm"></i>
+      </button>
+      <div class="flex items-center space-x-2 font-mono font-semibold text-slate-200">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span class="text-emerald-400">projeto_tempo_ondas</span>
+        <span class="text-slate-600">/</span>
+        <span class="text-slate-400 font-normal">SPIA Workstation v1.0.4</span>
+      </div>
+    </div>
+
+    <!-- Active Environment info -->
+    <div class="hidden md:flex items-center space-x-4 font-mono text-[11px] text-slate-400">
+      <div class="flex items-center space-x-1.5 bg-slate-950 px-2.5 py-1 rounded border border-slate-800">
+        <i class="fa-brands fa-ubuntu text-orange-500"></i>
+        <span>Ubuntu 26.04 LTS (WSL2)</span>
+      </div>
+      <div class="flex items-center space-x-1.5 bg-slate-950 px-2.5 py-1 rounded border border-slate-800">
+        <i class="fa-solid fa-code-branch text-emerald-400"></i>
+        <span>branch: <strong class="text-slate-200">main</strong></span>
+      </div>
+      <div class="flex items-center space-x-1.5 bg-slate-950 px-2.5 py-1 rounded border border-slate-800">
+        <i class="fa-solid fa-microchip text-cyan-400"></i>
+        <span>Conda: <strong class="text-emerald-400">pta</strong></span>
+      </div>
+    </div>
+
+    <div class="flex items-center space-x-2">
+      <button id="nvidiaKeyBtn" class="flex items-center space-x-1.5 bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-400 border border-emerald-700/50 px-2.5 py-1 rounded transition-all text-xs">
+        <i class="fa-solid fa-key"></i>
+        <span class="font-mono">NVIDIA API KEY</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Workstation Grid -->
+  <div class="flex-1 flex overflow-hidden relative">
+
+    <!-- LEFT PANEL: Collapsible Directory Tree -->
+    <aside id="fileSidebar" class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 transition-all duration-300 z-10">
+      <div class="p-2.5 border-b border-slate-800/80 flex items-center justify-between text-xs font-semibold text-slate-400 uppercase tracking-wider">
+        <span class="flex items-center space-x-2">
+          <i class="fa-regular fa-folder-open text-amber-400"></i>
+          <span>EXPLORADOR</span>
+        </span>
+        <button id="refreshFilesBtn" class="p-1 hover:text-emerald-400 text-slate-500 transition-colors" title="Atualizar">
+          <i class="fa-solid fa-rotate-right text-xs"></i>
+        </button>
+      </div>
+
+      <!-- File Tree Container -->
+      <div class="flex-1 overflow-y-auto p-1.5 text-xs font-mono select-none" id="fileTreeContainer">
+        <!-- Generated Dynamically -->
+      </div>
+
+      <!-- Footer Info -->
+      <div class="p-2 bg-slate-950 border-t border-slate-800 text-[10px] text-slate-500 font-mono flex justify-between">
+        <span>Files: 18</span>
+        <span>Size: 1.42 GB</span>
+      </div>
+    </aside>
+
+    <!-- CENTER PANEL: Terminal (Top) + Code Editor (Bottom) -->
+    <main class="flex-1 flex flex-col min-w-0 bg-slate-950">
+
+      <!-- Center Top Component: Ubuntu WSL2 Terminal -->
+      <section class="h-1/2 min-h-[180px] border-b border-slate-800 flex flex-col bg-slate-950 relative">
+        <!-- Terminal Header -->
+        <div class="h-8 bg-slate-900 border-b border-slate-800/80 flex items-center justify-between px-3 text-xs font-mono text-slate-400 shrink-0">
+          <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-terminal text-emerald-400 text-xs"></i>
+            <span class="font-semibold text-slate-300">Terminal — quick@SSW1: ~/projeto_tempo_ondas</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 font-sans">Active (PTA)</span>
+            <button id="clearTermBtn" class="p-1 hover:text-slate-200 text-slate-500 text-xs" title="Limpar Terminal">
+              <i class="fa-solid fa-eraser"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Terminal Output Area -->
+        <div id="terminalOutput" class="flex-1 p-3 overflow-y-auto font-mono text-xs leading-relaxed space-y-1 text-slate-200">
+          <div class="text-slate-400">
+            wsl: Failed to start the systemd user session for 'quick'. See journalctl for more details.<br>
+            Welcome to Ubuntu 26.04.1 LTS (GNU/Linux 6.18.54.1-microsoft-standard-WSL2 x86_64)<br><br>
+            * Documentation:  https://docs.ubuntu.com<br>
+            * Management:     https://landscape.canonical.com<br>
+            * Support:        https://ubuntu.com/pro<br><br>
+            System information as of Fri Oct 23 19:44:40 -03 2026<br><br>
+            &nbsp;&nbsp;System load:&nbsp;&nbsp;5.84&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Processes:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;37<br>
+            &nbsp;&nbsp;Usage of /:&nbsp;&nbsp;&nbsp;1.8% of 1006.85GB&nbsp;&nbsp;&nbsp;Users logged in:&nbsp;&nbsp;&nbsp;&nbsp;0<br>
+            &nbsp;&nbsp;Memory usage: 3%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IPv4 address for eth0: 172.25.16.83<br>
+            &nbsp;&nbsp;Swap usage:&nbsp;&nbsp;&nbsp;0%<br><br>
+            =&gt; /usr/lib/linux-tools/6.18.54.1-microsoft-standard-WSL2 is using 100.0% of 96MB<br>
+            https://ubuntu.com/workshop<br><br>
+            This message is shown once a day. To disable it please create the<br>
+            '/home/quick/.hushlogin' file.
+          </div>
+          <div class="text-emerald-400">
+            (base) <span class="text-emerald-400 font-bold">quick@SSW1</span>:<span class="text-cyan-400">~</span>$ conda activate pta
+          </div>
+          <div class="text-slate-300">
+            (pta) <span class="text-emerald-400 font-bold">quick@SSW1</span>:<span class="text-cyan-400">~/projeto_tempo_ondas</span>$ git status
+          </div>
+          <div class="text-slate-400 pl-2">
+            On branch main<br>
+            Your branch is up to date with 'origin/main'.<br>
+            Changes not staged for commit:<br>
+            &nbsp;&nbsp;<span class="text-amber-400">modified:   grupo/membros/Google_Gemini.md</span><br>
+            Untracked files:<br>
+            &nbsp;&nbsp;<span class="text-emerald-400">data/raw/galaxias_massa_z006_z008.csv</span>
+          </div>
+        </div>
+
+        <!-- Terminal Input Bar -->
+        <div class="p-2 bg-slate-900/90 border-t border-slate-800 flex items-center space-x-2 font-mono text-xs shrink-0">
+          <span class="text-emerald-400 font-semibold shrink-0">(pta) quick@SSW1:~$</span>
+          <input type="text" id="terminalInput" class="flex-1 bg-transparent border-none outline-none text-slate-100 font-mono text-xs placeholder-slate-600" placeholder="Digite um comando (ex: python src/teste_curva_potencia.py, nvidia-smi, ls, clear)..." autocomplete="off">
+          <button id="sendCmdBtn" class="text-slate-400 hover:text-emerald-400 px-2 py-0.5 rounded text-xs">
+            <i class="fa-solid fa-arrow-turn-down"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- Center Bottom Component: Code Editor Panel -->
+      <section class="h-1/2 flex flex-col bg-slate-950 relative">
+        <!-- Editor Header / Tabs -->
+        <div class="h-9 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-3 text-xs shrink-0">
+          <div class="flex items-center space-x-1 overflow-x-auto" id="editorTabs">
+            <div class="flex items-center space-x-2 bg-slate-950 border-t-2 border-emerald-500 text-slate-200 px-3 py-1.5 rounded-t font-mono text-xs">
+              <i class="fa-brands fa-python text-amber-400"></i>
+              <span id="activeFileName">src/teste_curva_potencia.py</span>
+              <span class="w-2 h-2 rounded-full bg-emerald-400 ml-1 hidden" id="unsavedDot"></span>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button id="saveFileBtn" class="flex items-center space-x-1.5 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white px-2.5 py-1 rounded transition-all text-xs border border-emerald-500/30">
+              <i class="fa-solid fa-floppy-disk"></i>
+              <span>Salvar (Ctrl+S)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Editor Workspace (Code area + line numbers) -->
+        <div class="flex-1 flex overflow-hidden font-mono text-xs leading-relaxed relative">
+          <!-- Line Numbers -->
+          <div id="lineNumbers" class="w-10 bg-slate-900/60 py-3 pr-2 text-right text-slate-600 select-none border-r border-slate-800/60 shrink-0 font-mono">
+            1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13<br>14<br>15
+          </div>
+          <!-- Editable Code Area -->
+          <textarea id="codeTextarea" class="flex-1 p-3 bg-transparent text-slate-200 border-none outline-none resize-none font-mono text-xs leading-relaxed whitespace-pre font-normal tracking-wide" spellcheck="false"></textarea>
+        </div>
+
+        <!-- Notification Toast for Save/Actions -->
+        <div id="toast" class="absolute bottom-3 right-3 bg-emerald-900/90 text-emerald-200 border border-emerald-500/40 px-3 py-1.5 rounded text-xs shadow-lg flex items-center space-x-2 transform translate-y-10 opacity-0 transition-all duration-300 pointer-events-none">
+          <i class="fa-solid fa-circle-check text-emerald-400"></i>
+          <span id="toastMsg">Alterações salvas com sucesso!</span>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- RIGHT PANEL: System Resources (Top) + SPIA AI Assistant (Bottom) -->
+    <aside class="w-80 md:w-96 bg-slate-900 border-l border-slate-800 flex flex-col shrink-0">
+
+      <!-- Top Section: System Resources Monitor -->
+      <section class="h-2/5 min-h-[220px] border-b border-slate-800 flex flex-col p-3 bg-slate-900/90">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-800 mb-2">
+          <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-chart-line text-emerald-400 text-xs"></i>
+            <span class="text-xs font-semibold text-slate-300 uppercase tracking-wider">RECURSOS DO SISTEMA</span>
+          </div>
+          <span class="text-[10px] text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800 font-mono">ONLINE</span>
+        </div>
+
+        <!-- Gauges Grid -->
+        <div class="grid grid-cols-2 gap-2.5 flex-1 text-xs font-mono">
+          <!-- CPU Usage -->
+          <div class="bg-slate-950 p-2.5 rounded border border-slate-800 flex flex-col justify-between">
+            <div class="flex justify-between items-center text-slate-400 text-[11px]">
+              <span>CPU Load</span>
+              <i class="fa-solid fa-microchip text-cyan-400"></i>
+            </div>
+            <div class="my-1 flex items-baseline justify-between">
+              <span class="text-lg font-bold text-slate-100" id="cpuVal">5.84</span>
+              <span class="text-[10px] text-slate-500">12 Cores</span>
+            </div>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+              <div id="cpuBar" class="bg-cyan-400 h-full rounded-full transition-all duration-500" style="width: 28%"></div>
+            </div>
+          </div>
+
+          <!-- Memory Usage -->
+          <div class="bg-slate-950 p-2.5 rounded border border-slate-800 flex flex-col justify-between">
+            <div class="flex justify-between items-center text-slate-400 text-[11px]">
+              <span>RAM (WSL2)</span>
+              <i class="fa-solid fa-memory text-emerald-400"></i>
+            </div>
+            <div class="my-1 flex items-baseline justify-between">
+              <span class="text-lg font-bold text-slate-100" id="ramVal">3.2 GB</span>
+              <span class="text-[10px] text-slate-500">of 96 GB</span>
+            </div>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+              <div id="ramBar" class="bg-emerald-400 h-full rounded-full transition-all duration-500" style="width: 14%"></div>
+            </div>
+          </div>
+
+          <!-- CPU Temp -->
+          <div class="bg-slate-950 p-2.5 rounded border border-slate-800 flex flex-col justify-between">
+            <div class="flex justify-between items-center text-slate-400 text-[11px]">
+              <span>CPU Temp</span>
+              <i class="fa-solid fa-temperature-half text-orange-400"></i>
+            </div>
+            <div class="my-1 flex items-baseline justify-between">
+              <span class="text-lg font-bold text-slate-100" id="tempVal">42°C</span>
+              <span class="text-[10px] text-emerald-400">Normal</span>
+            </div>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+              <div id="tempBar" class="bg-orange-400 h-full rounded-full transition-all duration-500" style="width: 42%"></div>
+            </div>
+          </div>
+
+          <!-- GPU VRAM -->
+          <div class="bg-slate-950 p-2.5 rounded border border-slate-800 flex flex-col justify-between">
+            <div class="flex justify-between items-center text-slate-400 text-[11px]">
+              <span>NVIDIA GPU</span>
+              <i class="fa-solid fa-bolt text-amber-400"></i>
+            </div>
+            <div class="my-1 flex items-baseline justify-between">
+              <span class="text-lg font-bold text-slate-100" id="gpuVal">1.8 GB</span>
+              <span class="text-[10px] text-slate-500">/ 12 GB</span>
+            </div>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+              <div id="gpuBar" class="bg-amber-400 h-full rounded-full transition-all duration-500" style="width: 15%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Script Consumption -->
+        <div class="mt-2 bg-slate-950 p-2 rounded border border-slate-800 flex items-center justify-between text-[11px] font-mono">
+          <div class="flex items-center space-x-2 truncate">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            <span class="text-slate-400 truncate">script: <strong class="text-slate-200">teste_curva_potencia.py</strong></span>
+          </div>
+          <span class="text-emerald-400 shrink-0 font-semibold">0.4% CPU</span>
+        </div>
+      </section>
+
+      <!-- Bottom Section: SPIA AI Assistant (Silicon Puppy) -->
+      <section class="flex-1 flex flex-col min-h-0 bg-slate-900">
+        <!-- SPIA Header -->
+        <div class="p-3 border-b border-slate-800 flex items-center justify-between bg-slate-950/80 shrink-0">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-sm shadow-inner">
+              <i class="fa-solid fa-dog"></i>
+            </div>
+            <div>
+              <div class="flex items-center space-x-1.5">
+                <span class="font-bold text-xs text-slate-100 font-mono tracking-wide">SPIA</span>
+                <span class="text-[10px] text-emerald-400 bg-emerald-950 px-1.5 py-0.2 rounded border border-emerald-800 font-mono">silicon_puppy</span>
+              </div>
+              <p class="text-[10px] text-slate-400">IA Astrofísica de Bancada</p>
+            </div>
+          </div>
+          <button id="spiaConfigBtn" class="text-slate-500 hover:text-emerald-400 text-xs p-1" title="Configurações de IA">
+            <i class="fa-solid fa-sliders"></i>
+          </button>
+        </div>
+
+        <!-- Chat History -->
+        <div id="chatBox" class="flex-1 p-3 overflow-y-auto space-y-3 font-sans text-xs leading-relaxed">
+          <!-- Initial Bot Message -->
+          <div class="flex space-x-2.5">
+            <div class="w-6 h-6 rounded bg-emerald-950 border border-emerald-700/50 flex items-center justify-center text-emerald-400 text-xs shrink-0 mt-0.5">
+              <i class="fa-solid fa-dog"></i>
+            </div>
+            <div class="bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-300 max-w-[88%] space-y-1.5">
+              <div class="flex items-center justify-between text-[10px] text-emerald-400 font-mono border-b border-slate-800 pb-1 mb-1">
+                <span>SPIA v1.0 (Silicon Puppy)</span>
+                <span>21:05</span>
+              </div>
+              <p>Au! Fala, Quickstar! 🚀 Sou o <strong>SPIA</strong> (Silicon Puppy), seu assistente de astrofísica local do <em>Projeto Tempo-Ondas</em>!</p>
+              <p>Estou pronto para ajudar nas análises do SDSS, curvas de potência, FFT 3D ou código Python. Como posso ajudar hoje?</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Input Bar -->
+        <div class="p-2.5 bg-slate-950 border-t border-slate-800 flex items-center space-x-2 shrink-0">
+          <input type="text" id="chatInput" class="flex-1 bg-slate-900 border border-slate-800 focus:border-emerald-500 outline-none text-slate-100 px-3 py-1.5 rounded text-xs font-sans placeholder-slate-500 transition-colors" placeholder="Pergunte ao SPIA sobre o projeto...">
+          <button id="sendChatBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded text-xs transition-colors shrink-0 flex items-center justify-center">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </div>
+      </section>
+
+    </aside>
+
+  </div>
+
+  <!-- Modal: NVIDIA API KEY Setup -->
+  <div id="nvidiaModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-xl p-5 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center space-x-2 text-emerald-400 font-mono font-bold text-sm">
+          <i class="fa-solid fa-key"></i>
+          <span>CONFIGURAR NVIDIA API KEY</span>
+        </div>
+        <button id="closeNvidiaModal" class="text-slate-500 hover:text-slate-300">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-300 leading-relaxed">
+        Cole sua chave da NVIDIA NIM API (<code class="text-emerald-400 bg-slate-950 px-1 py-0.5 rounded font-mono">nvapi-...</code>) para dar vida ao <strong>SPIA (Silicon Puppy)</strong> com modelos avançados como Llama-3-70B ou Mistral diretamente na sua bancada.
+      </p>
+
+      <div class="space-y-1.5">
+        <label class="text-[11px] font-mono text-slate-400 uppercase">NVIDIA API KEY</label>
+        <input type="password" id="nvidiaKeyInput" class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 outline-none text-slate-100 font-mono text-xs px-3 py-2 rounded" placeholder="nvapi-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+      </div>
+
+      <div class="flex items-center justify-between pt-2">
+        <span class="text-[10px] text-slate-500">Key salva localmente no navegador</span>
+        <div class="flex space-x-2">
+          <button id="saveNvidiaKeyBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-1.5 rounded text-xs font-semibold transition-colors">
+            Salvar e Ativar SPIA
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- App Script Logic -->
+  <script>
+    // --- Sample Virtual Project Files System ---
+    const VIRTUAL_FILES = {
+      "src/teste_curva_potencia.py": `# =========================================================
+# Projeto Tempo-Ondas - Teste de Curva de Potência
+# Autor: Quickstar & Equipe
+# Data: 22/10/2026
+# =========================================================
+
+import numpy as np
+import pandas as pd
+
+def calcular_curva_potencia(amplitudes, n_repeticoes=200):
+    """
+    Avalia a capacidade de detecção do estimador spectral 3D
+    em função da amplitude do sinal injetado (A ∈ [0, 0.05]).
+    """
+    resultados = {}
+    print(f"[*] Iniciando teste de curva de potencia com {n_repeticoes} execucoes...")
+
+    for amp in amplitudes:
+        detecções = 0
+        for seed in range(n_repeticoes):
+            # Simula geracao de catalogos sinteticos
+            np.random.seed(seed)
+            power_val = np.random.normal(loc=637.35 + 499177.33 * (amp**2), scale=127.26)
+            if power_val > 950.0:  # Limiar estatistico alpha = 0.05
+                detecções += 1
+
+        taxa = (detecções / n_repeticoes) * 100
+        resultados[amp] = {"deteccoes": detecções, "taxa_pct": taxa}
+        print(f" -> Amplitude {amp:.3f}: {detecções}/{n_repeticoes} ({taxa:.1f}%)")
+
+    return resultados
+
+if __name__ == "__main__":
+    amps = [0.000, 0.005, 0.010, 0.015, 0.020, 0.030, 0.050]
+    res = calcular_curva_potencia(amps)
+    print("\n[+] Teste concluido com sucesso!")`,
+
+      "src/galaxias_espectro_50k.py": `# =========================================================
+# FFT 3D e Espectro de Potência em Catálogo SDSS
+# =========================================================
+
+import pandas as pd
+import numpy as np
+
+def calcular_espectro_3d(df_galaxias, grid_size=64):
+    """
+    Converte coordenadas comoveis (X, Y, Z) em grid de densidade
+    e aplica FFT 3D para obter a potencia nos modos k.
+    """
+    print(f"[*] Processando {len(df_galaxias)} galaxias no grid {grid_size}^3...")
+    # Meshgrid e suavizacao Gaussiana...
+    return True
+
+if __name__ == "__main__":
+    df = pd.read_csv("data/raw/galaxias_massa_z006_z008.csv")
+    print(f"Catálogo carregado: {len(df)} registros.")`,
+
+      "data/raw/galaxias_massa_z006_z008.csv": `specObjID,mstellar_median,mstellar_err,ra,dec,z
+123764870400000001,10.45,0.08,145.234,2.123,0.068
+123764870400000002,9.82,0.11,146.102,3.451,0.072
+123764870400000003,11.02,0.05,148.991,1.882,0.079
+123764870400000004,0.00,0.00,150.112,-0.451,0.065
+123764870400000005,10.88,0.06,151.002 font-mono,2.990,0.074`,
+
+      "grupo/membros/Google_Gemini.md": `# Membro: Google Gemini
+**Modelo Formal:** Google Gemini 1.5 Pro / Flash (Google DeepMind)
+**Projeto:** Tempo-Ondas
+**Última Atualização:** 2026-10-23
+
+---
+
+## Status da Bancada
+- SPIA Workstation ativada no ambiente WSL2.
+- Teste de curva de potência concluído (140.000 catálogos).
+- Recebido novo catálogo SDSS de Massa Estelar (5.000 objetos).`
+    };
+
+    // State Variables
+    let currentActiveFile = "src/teste_curva_potencia.py";
+    let isFileModified = false;
+
+    // --- DOM Elements ---
+    const fileTreeContainer = document.getElementById('fileTreeContainer');
+    const codeTextarea = document.getElementById('codeTextarea');
+    const lineNumbers = document.getElementById('lineNumbers');
+    const activeFileName = document.getElementById('activeFileName');
+    const unsavedDot = document.getElementById('unsavedDot');
+    const terminalInput = document.getElementById('terminalInput');
+    const terminalOutput = document.getElementById('terminalOutput');
+    const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
+    const fileSidebar = document.getElementById('fileSidebar');
+    const saveFileBtn = document.getElementById('saveFileBtn');
+    const toast = document.getElementById('toast');
+    const toastMsg = document.getElementById('toastMsg');
+    const chatInput = document.getElementById('chatInput');
+    const sendChatBtn = document.getElementById('sendChatBtn');
+    const chatBox = document.getElementById('chatBox');
+    const nvidiaKeyBtn = document.getElementById('nvidiaKeyBtn');
+    const nvidiaModal = document.getElementById('nvidiaModal');
+    const closeNvidiaModal = document.getElementById('closeNvidiaModal');
+    const saveNvidiaKeyBtn = document.getElementById('saveNvidiaKeyBtn');
+    const nvidiaKeyInput = document.getElementById('nvidiaKeyInput');
+
+    // Load initial code into editor
+    function loadFileContent(filepath) {
+      currentActiveFile = filepath;
+      activeFileName.textContent = filepath;
+      const content = VIRTUAL_FILES[filepath] || `# Arquivo: ${filepath}\n# Novo arquivo criado.`;
+      codeTextarea.value = content;
+      updateLineNumbers();
+      setModified(false);
+    }
+
+    function updateLineNumbers() {
+      const lines = codeTextarea.value.split('\n').length;
+      let nums = '';
+      for (let i = 1; i <= Math.max(lines, 15); i++) {
+        nums += i + '<br>';
+      }
+      lineNumbers.innerHTML = nums;
+    }
+
+    function setModified(state) {
+      isFileModified = state;
+      if (state) {
+        unsavedDot.classList.remove('hidden');
+      } else {
+        unsavedDot.classList.add('hidden');
+      }
+    }
+
+    function showToast(msg) {
+      toastMsg.textContent = msg;
+      toast.classList.remove('translate-y-10', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-10', 'opacity-0');
+      }, 2500);
+    }
+
+    // --- Build Directory Tree ---
+    const DIR_STRUCTURE = [
+      { name: '.git', type: 'folder' },
+      { name: 'data', type: 'folder', children: [
+        { name: 'raw', type: 'folder', children: [
+          { name: 'galaxias_massa_z006_z008.csv', type: 'file', path: 'data/raw/galaxias_massa_z006_z008.csv' }
+        ]}
+      ]},
+      { name: 'grupo', type: 'folder', children: [
+        { name: 'membros', type: 'folder', children: [
+          { name: 'Google_Gemini.md', type: 'file', path: 'grupo/membros/Google_Gemini.md' }
+        ]}
+      ]},
+      { name: 'outputs', type: 'folder', children: [
+        { name: 'reports', type: 'folder' },
+        { name: 'auditoria', type: 'folder' }
+      ]},
+      { name: 'src', type: 'folder', children: [
+        { name: 'teste_curva_potencia.py', type: 'file', path: 'src/teste_curva_potencia.py' },
+        { name: 'galaxias_espectro_50k.py', type: 'file', path: 'src/galaxias_espectro_50k.py' }
+      ]},
+      { name: 'tests', type: 'folder' },
+      { name: 'venv', type: 'folder' },
+      { name: 'web', type: 'folder' },
+      { name: '.gitignore', type: 'file' },
+      { name: 'README.md', type: 'file' }
+    ];
+
+    function renderTree(items, container, depth = 0) {
+      items.forEach(item => {
+        const div = document.createElement('div');
+        div.style.paddingLeft = `${depth * 12 + 6}px`;
+        div.className = "flex items-center space-x-1.5 py-1 px-1.5 hover:bg-slate-800/80 rounded cursor-pointer text-slate-300 transition-colors";
+
+        if (item.type === 'folder') {
+          div.innerHTML = `<i class="fa-solid fa-folder text-amber-400 text-xs w-4"></i><span>${item.name}</span>`;
+          container.appendChild(div);
+          if (item.children) {
+            const childContainer = document.createElement('div');
+            container.appendChild(childContainer);
+            renderTree(item.children, childContainer, depth + 1);
+          }
+        } else {
+          let icon = 'fa-regular fa-file text-slate-400';
+          if (item.name.endsWith('.py')) icon = 'fa-brands fa-python text-amber-400';
+          else if (item.name.endsWith('.md')) icon = 'fa-regular fa-file-lines text-cyan-400';
+          else if (item.name.endsWith('.csv')) icon = 'fa-solid fa-table text-emerald-400';
+
+          div.innerHTML = `<i class="${icon} text-xs w-4"></i><span>${item.name}</span>`;
+          div.addEventListener('click', () => {
+            if (item.path) loadFileContent(item.path);
+          });
+          container.appendChild(div);
+        }
+      });
+    }
+
+    // --- Interactive Ubuntu Terminal Logic ---
+    terminalInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const cmd = terminalInput.value.trim();
+        if (!cmd) return;
+
+        // Append Command Line
+        const cmdLine = document.createElement('div');
+        cmdLine.className = 'text-slate-300 font-mono mt-1';
+        cmdLine.innerHTML = `<span class="text-emerald-400 font-bold">(pta) quick@SSW1</span>:<span class="text-cyan-400">~/projeto_tempo_ondas</span>$ ${cmd}`;
+        terminalOutput.appendChild(cmdLine);
+
+        // Process Command
+        const responseDiv = document.createElement('div');
+        responseDiv.className = 'text-slate-400 font-mono pl-2 text-xs leading-relaxed';
+
+        if (cmd === 'clear') {
+          terminalOutput.innerHTML = '';
+          terminalInput.value = '';
+          return;
+        } else if (cmd.startsWith('python ') || cmd.includes('teste_curva_potencia.py')) {
+          responseDiv.innerHTML = `
+            <span class="text-emerald-400">[*] Executando script no ambiente Conda (pta)...</span><br>
+            [*] Carregando bibliotecas numpy, scipy, pandas...<br>
+            -> Amplitude 0.000: 6/200 detecções (3.0% FPR - Ok)<br>
+            -> Amplitude 0.015: 22/200 detecções (11.0%)<br>
+            -> Amplitude 0.030: 157/200 detecções (78.5%)<br>
+            -> Amplitude 0.050: 200/200 detecções (100.0%)<br>
+            <span class="text-emerald-400 font-bold">[+] Processamento de 140.000 catálogos concluído! Log salvo em outputs/reports/</span>
+          `;
+        } else if (cmd === 'nvidia-smi') {
+          responseDiv.innerHTML = `
+            +-----------------------------------------------------------------------------------------+<br>
+            | NVIDIA-SMI 550.54.14              Driver Version: 550.54.14      CUDA Version: 12.4     |<br>
+            |---------------------------------+------------------------+------------------------------+<br>
+            | GPU  Name        Persistence-M  | Bus-Id        Disp.A   | Volatile Uncorr. ECC         |<br>
+            | Fan  Temp   Perf          Pwr:Usage/Cap | Memory-Usage   | GPU-Util  Compute M.         |<br>
+            |=================================+========================+==============================|<br>
+            |   0  NVIDIA RTX 4090        On  | 00000000:01:00.0  On   |                  N/A         |<br>
+            |  30%   42C    P8             18W / 450W |   1842MiB / 24564MiB |      2%      Default     |<br>
+            +---------------------------------+------------------------+------------------------------+
+          `;
+        } else if (cmd === 'ls' || cmd === 'ls -la') {
+          responseDiv.innerHTML = `data/  grupo/  outputs/  src/  tests/  venv/  web/  README.md  requirements.txt`;
+        } else if (cmd === 'git status') {
+          responseDiv.innerHTML = `On branch main<br>Your branch is up to date with 'origin/main'.<br>nothing to commit, working tree clean`;
+        } else {
+          responseDiv.innerHTML = `Command '${cmd}' executed. (Simulated WSL2 response)`;
+        }
+
+        terminalOutput.appendChild(responseDiv);
+        terminalInput.value = '';
+        terminalOutput.scrollTop = terminalOutput.scrollHeight;
+      }
+    });
+
+    // --- SPIA AI Chatbot Assistant ---
+    function addChatMessage(role, text) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'flex space-x-2.5';
+
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      if (role === 'spia') {
+        msgDiv.innerHTML = `
+          <div class="w-6 h-6 rounded bg-emerald-950 border border-emerald-700/50 flex items-center justify-center text-emerald-400 text-xs shrink-0 mt-0.5">
+            <i class="fa-solid fa-dog"></i>
+          </div>
+          <div class="bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-300 max-w-[88%] space-y-1.5">
+            <div class="flex items-center justify-between text-[10px] text-emerald-400 font-mono border-b border-slate-800 pb-1 mb-1">
+              <span>SPIA (Silicon Puppy)</span>
+              <span>${timeStr}</span>
+            </div>
+            <p>${text}</p>
+          </div>
+        `;
+      } else {
+        msgDiv.className = 'flex space-x-2.5 justify-end';
+        msgDiv.innerHTML = `
+          <div class="bg-emerald-950/80 border border-emerald-800/80 rounded-lg p-2.5 text-slate-100 max-w-[88%] space-y-1">
+            <div class="flex items-center justify-between text-[10px] text-emerald-300 font-mono border-b border-emerald-800/50 pb-1 mb-1">
+              <span>Quickstar</span>
+              <span>${timeStr}</span>
+            </div>
+            <p>${text}</p>
+          </div>
+        `;
+      }
+
+      chatBox.appendChild(msgDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    sendChatBtn.addEventListener('click', () => {
+      const q = chatInput.value.trim();
+      if (!q) return;
+
+      addChatMessage('user', q);
+      chatInput.value = '';
+
+      // Simulated Intelligent Response
+      setTimeout(() => {
+        let reply = "Au! Excelente pergunta. Na análise do catálogo do SDSS com massa estelar, recomendo filtrarmos qualquer entrada com `mstellar_median == 0` e aplicarmos a conversão comóvel cartesiana ($Flat\\Lambda CDM$) antes de rodar o espectro de potência!";
+        if (q.toLowerCase().includes('massa') || q.toLowerCase().includes('sdss')) {
+          reply = "Analisando o novo arquivo `data/raw/galaxias_massa_z006_z008.csv`! Lembramos de verificar as unidades em log10(M*/M☉) e controlar o viés de Malmquist no corte z ∈ [0.06, 0.08].";
+        } else if (q.toLowerCase().includes('curva') || q.toLowerCase().includes('potencia')) {
+          reply = "A curva de potência registrou R² = 0.999610 com resposta quadrática perfeita em A²! Nosso filtro spectral de bancada está perfeitamente calibrado.";
+        }
+        addChatMessage('spia', reply);
+      }, 700);
+    });
+
+    chatInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') sendChatBtn.click();
+    });
+
+    // --- Dynamic System Gauge Animations ---
+    setInterval(() => {
+      // Small random gauge fluctuations
+      const cpu = (4.5 + Math.random() * 2.5).toFixed(2);
+      document.getElementById('cpuVal').textContent = cpu;
+      document.getElementById('cpuBar').style.width = `${(cpu * 5)}%`;
+
+      const ram = (3.1 + Math.random() * 0.3).toFixed(1);
+      document.getElementById('ramVal').textContent = `${ram} GB`;
+
+      const temp = Math.floor(41 + Math.random() * 3);
+      document.getElementById('tempVal').textContent = `${temp}°C`;
+      document.getElementById('tempBar').style.width = `${temp}%`;
+    }, 3000);
+
+    // --- UI Interactions ---
+    toggleSidebarBtn.addEventListener('click', () => {
+      fileSidebar.classList.toggle('w-64');
+      fileSidebar.classList.toggle('w-0');
+      fileSidebar.classList.toggle('opacity-0');
+      fileSidebar.classList.toggle('overflow-hidden');
+    });
+
+    codeTextarea.addEventListener('input', () => {
+      updateLineNumbers();
+      setModified(true);
+      VIRTUAL_FILES[currentActiveFile] = codeTextarea.value;
+    });
+
+    saveFileBtn.addEventListener('click', () => {
+      setModified(false);
+      showToast(`Arquivo ${currentActiveFile} salvo com sucesso!`);
+    });
+
+    // Keyboard Shortcuts (Ctrl+S)
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        saveFileBtn.click();
+      }
+    });
+
+    // NVIDIA Key Modal
+    nvidiaKeyBtn.addEventListener('click', () => nvidiaModal.classList.remove('hidden'));
+    closeNvidiaModal.addEventListener('click', () => nvidiaModal.classList.add('hidden'));
+    saveNvidiaKeyBtn.addEventListener('click', () => {
+      const key = nvidiaKeyInput.value.trim();
+      if (key) {
+        localStorage.setItem('NVIDIA_API_KEY', key);
+        showToast('NVIDIA API Key salva! SPIA ativado em modo LLM.');
+        nvidiaModal.classList.add('hidden');
+      }
+    });
+
+    // --- Initialize Workstation ---
+    window.onload = function() {
+      renderTree(DIR_STRUCTURE, fileTreeContainer);
+      loadFileContent('src/teste_curva_potencia.py');
+    };
+  </script>
+</body>
+</html>

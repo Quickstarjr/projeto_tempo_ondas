@@ -1,0 +1,1277 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SPIA — silicon_puppy</title>
+
+<link rel="stylesheet"
+ href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.css">
+
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #101312;
+  --panel: #171c19;
+  --border: #2b3830;
+  --green: #5cff95;
+  --muted: #a2b1a7;
+  --red: #ff7979;
+}
+* { box-sizing: border-box; }
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+body {
+  min-height: 0;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+  color: #e5eee8;
+  font: 14px/1.45 ui-monospace, Consolas, monospace;
+}
+header {
+  padding: 14px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: #141916;
+  border-bottom: 1px solid var(--border);
+}
+.brand {
+  color: var(--green);
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: .08em;
+}
+.sub { color: var(--muted); font-size: 12px; }
+#status { color: #ffd479; }
+main {
+  padding: 14px;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+.terminal {
+  width: 100%;
+  max-width: 1400px;
+  min-height: 0;
+  min-width: 0;
+  height: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #080b09;
+  box-shadow: 0 14px 50px #0007;
+}
+.termhead, footer {
+  padding: 10px 14px;
+  background: var(--panel);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.termhead { border-bottom: 1px solid var(--border); }
+footer {
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 8px 12px;
+  flex-wrap: wrap;
+}
+#terminal {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  padding: 12px;
+  overflow: hidden;
+}
+.dots { display: flex; gap: 6px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; }
+.dot:nth-child(1) { background: #ff6e67; }
+.dot:nth-child(2) { background: #ffd166; }
+.dot:nth-child(3) { background: var(--green); }
+button {
+  padding: 6px 10px;
+  color: #caffd9;
+  background: #203d2b;
+  border: 1px solid #326346;
+  border-radius: 6px;
+  font: inherit;
+  cursor: pointer;
+}
+button:hover { background: #2a5038; }
+@media (max-width: 600px) {
+  main { padding: 6px; }
+  .termhead { padding: 8px; }
+  footer { padding: 6px; gap: 4px; }
+  button { padding: 5px 8px; }
+  #terminal { padding: 5px; }
+}
+
+/* Navegação e editor SPIA */
+.view-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 10px 14px 0;
+  background: var(--bg);
+}
+.view-tab[aria-selected="true"] {
+  color: var(--green);
+  border-color: var(--green);
+  background: #203d2b;
+}
+.view-panel {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+.view-panel[hidden] { display: none !important; }
+.editor-shell {
+  width: 100%;
+  max-width: 1400px;
+  height: 100%;
+  min-height: 0;
+  margin: 0 auto;
+  display: flex;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel);
+  box-shadow: 0 14px 50px #0007;
+}
+.file-sidebar {
+  width: 270px;
+  min-width: 190px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  background: #121714;
+}
+.file-sidebar-head, .editor-head {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--green);
+  font-weight: 700;
+}
+.file-toolbar {
+  display: flex;
+  gap: 6px;
+  padding: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.file-toolbar button { flex: 1; }
+#file-path {
+  min-width: 0;
+  width: 100%;
+  padding: 8px;
+  color: var(--muted);
+  background: #0c100d;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  font: inherit;
+}
+#file-list {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 6px;
+}
+.file-entry {
+  display: block;
+  width: 100%;
+  margin: 2px 0;
+  text-align: left;
+  overflow-wrap: anywhere;
+  background: transparent;
+  border-color: transparent;
+}
+.file-entry:hover, .file-entry.active {
+  background: #203d2b;
+  border-color: #326346;
+}
+.editor-main {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.editor-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+#editor-current-path {
+  color: var(--muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+#editor-placeholder {
+  padding: 24px;
+  color: var(--muted);
+}
+#editor-content {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  resize: none;
+  padding: 14px;
+  border: 0;
+  outline: none;
+  color: #d9e5dc;
+  background: #080b09;
+  font: 13px/1.5 Consolas, "Liberation Mono", monospace;
+  tab-size: 2;
+}
+#editor-content:focus { box-shadow: inset 0 0 0 1px #326346; }
+.editor-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 12px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+}
+#editor-message { overflow-wrap: anywhere; }
+@media (max-width: 700px) {
+  .view-tabs { padding: 6px 6px 0; }
+  .editor-shell { flex-direction: column; }
+  .file-sidebar {
+    width: 100%;
+    min-width: 0;
+    max-height: 38%;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  #file-list { max-height: 130px; }
+  .editor-head { align-items: flex-start; flex-direction: column; }
+}
+
+
+/* Área de trabalho SPIA: painéis independentes */
+main {
+  flex-direction: row;
+  gap: 8px;
+  padding: 8px;
+  overflow: hidden;
+}
+#spia-left {
+  display: flex;
+  flex: 0 0 auto;
+  min-width: 0;
+  min-height: 0;
+  gap: 6px;
+}
+#tool-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  width: 44px;
+  flex: 0 0 44px;
+}
+#tool-rail button {
+  padding: 8px 2px;
+  min-height: 40px;
+}
+#explorer-panel {
+  display: flex;
+  flex-direction: column;
+  width: 250px;
+  min-width: 180px;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #121714;
+}
+#explorer-panel[hidden],
+#filhote-panel[hidden],
+.module-body[hidden],
+#panel-visualizer[hidden] {
+  display: none !important;
+}
+#explorer-panel .file-sidebar {
+  width: 100%;
+  min-width: 0;
+  flex: 1;
+  border: 0;
+}
+#workspace-center {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+}
+.module {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 110px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+}
+.module[data-collapsed="true"] {
+  flex: 0 0 auto;
+  min-height: 0;
+}
+.module-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  color: var(--green);
+  background: #141916;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  text-align: left;
+  font-weight: 700;
+}
+.module-head:hover { background: #1b2720; }
+.module-body {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+#panel-terminal .terminal {
+  flex: 1;
+  width: 100%;
+  height: auto;
+  max-width: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+#panel-editor .editor-shell {
+  flex: 1;
+  height: auto;
+  max-width: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+#editor-panel-body { min-height: 0; }
+#filhote-panel {
+  display: flex;
+  flex: 0 0 270px;
+  flex-direction: column;
+  min-width: 210px;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+}
+.side-head {
+  padding: 10px;
+  color: var(--green);
+  font-weight: 700;
+  border-bottom: 1px solid var(--border);
+}
+.side-placeholder {
+  padding: 12px;
+  color: var(--muted);
+}
+#visualizer-placeholder {
+  padding: 18px;
+  color: var(--muted);
+}
+
+#image-preview {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+#image-preview[hidden] { display: none !important; }
+#image-preview-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  min-height: 38px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-bottom: 1px solid var(--border);
+  background: #101512;
+}
+
+.image-preview-tab {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 260px;
+  padding: 8px 10px;
+  border: 0;
+  border-right: 1px solid var(--border);
+  border-radius: 0;
+  color: var(--muted);
+  background: #141916;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.image-preview-tab:hover {
+  background: #1b2720;
+}
+
+.image-preview-tab.active {
+  color: var(--green);
+  background: #203d2b;
+  box-shadow: inset 0 -2px 0 var(--green);
+}
+
+.image-preview-tab-label {
+  max-width: 210px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.image-preview-tab-close {
+  padding: 1px 5px;
+  border: 0;
+  color: var(--muted);
+  background: transparent;
+  border-radius: 4px;
+}
+
+.image-preview-tab-close:hover {
+  color: #fff;
+  background: #3a4b40;
+}
+
+#image-preview-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+}
+
+#image-preview-path {
+  overflow-wrap: anywhere;
+}
+
+#image-preview-stage {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  justify-content: center;
+  align-items: center;
+  overflow: auto;
+  padding: 12px;
+  background: #080b09;
+}
+#preview-image {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+@media (max-width: 900px) {
+  #explorer-panel { width: 210px; }
+  #filhote-panel { flex-basis: 220px; min-width: 180px; }
+}
+@media (max-width: 700px) {
+  main { gap: 5px; padding: 5px; }
+  #tool-rail { width: 36px; flex-basis: 36px; }
+  #explorer-panel { position: absolute; z-index: 5; top: 105px; bottom: 5px; left: 45px; width: min(78vw, 290px); box-shadow: 0 8px 28px #0009; }
+  #workspace-center { gap: 5px; }
+  #filhote-panel { flex-basis: 180px; min-width: 150px; }
+  .module { min-height: 90px; }
+  .termhead { padding: 6px; }
+  #panel-editor .editor-shell { flex-direction: column; }
+  #panel-editor .editor-head { align-items: flex-start; flex-direction: column; }
+}
+
+</style>
+</head>
+
+<body>
+<header>
+  <div>
+    <div class="brand">SPIA <span class="sub">/ silicon_puppy</span></div>
+    <div class="sub">Terminal Linux real · Ubuntu / WSL</div>
+  </div>
+  <div id="status">Carregando terminal…</div>
+</header>
+
+<main>
+<aside id="spia-left" aria-label="Ferramentas e arquivos">
+  <nav id="tool-rail" aria-label="Ferramentas SPIA">
+    <button id="explorer-toggle" type="button" aria-expanded="true"
+            title="Mostrar ou ocultar Explorador">📁</button>
+    <button type="button" title="Comandos (em breve)" disabled>⌘</button>
+    <button type="button" title="Resultados (em breve)" disabled>▤</button>
+    <button type="button" title="Git (em breve)" disabled>⑂</button>
+  </nav>
+  <aside id="explorer-panel" aria-label="Explorador de arquivos">
+    <div class="file-sidebar">
+      <div class="file-sidebar-head">EXPLORADOR</div>
+      <div class="file-toolbar">
+        <button id="files-up" type="button" title="Subir um diretório">↑ Voltar</button>
+        <button id="files-refresh" type="button">Atualizar</button>
+      </div>
+      <input id="file-path" type="text" value="" readonly aria-label="Diretório atual">
+      <div id="file-list" aria-live="polite">Carregue o explorador para listar arquivos.</div>
+    </div>
+  </aside>
+</aside>
+
+<section id="workspace-center" aria-label="Área de trabalho">
+  <section class="module" id="panel-terminal" data-collapsed="false"
+           aria-label="Terminal SPIA">
+    <button class="module-head" type="button" aria-expanded="true"
+            aria-controls="terminal-panel-body">
+      <span>TERMINAL · Ubuntu / WSL</span><span class="collapse-mark">−</span>
+    </button>
+    <div class="module-body" id="terminal-panel-body">
+      <section class="terminal" aria-label="Terminal Linux real">
+        <div class="termhead">
+          <span>Bash persistente</span>
+          <div class="dots"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div>
+        </div>
+        <div id="terminal"></div>
+        <footer>
+          <button id="paste" type="button">Colar</button>
+          <button id="run" type="button">Executar</button>
+          <button id="copy" type="button">Copiar</button>
+          <button id="clear" type="button">Limpar</button>
+        </footer>
+      </section>
+    </div>
+  </section>
+
+  <section class="module" id="panel-editor" data-collapsed="false"
+           aria-label="Editor de arquivos">
+    <button class="module-head" type="button" aria-expanded="true"
+            aria-controls="editor-panel-body">
+      <span>EDITOR DE CÓDIGO</span><span class="collapse-mark">−</span>
+    </button>
+    <div class="module-body" id="editor-panel-body">
+      <div class="editor-shell">
+        <section class="editor-main" aria-label="Área de edição">
+          <div class="editor-head">
+            <span>Arquivo aberto</span>
+            <span id="editor-current-path">Nenhum arquivo aberto</span>
+          </div>
+          <div id="editor-placeholder">Selecione um arquivo no Explorador para começar.</div>
+          <textarea id="editor-content" spellcheck="false"
+                    aria-label="Conteúdo do arquivo" hidden></textarea>
+          <footer class="editor-footer">
+            <button id="editor-save" type="button" disabled>Salvar</button>
+            <button id="editor-reload" type="button" disabled>Reabrir</button>
+            <span id="editor-message">Nenhum arquivo aberto.</span>
+          </footer>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <section class="module" id="panel-visualizer" data-collapsed="true"
+           aria-label="Visualizador de resultados">
+    <button class="module-head" type="button" aria-expanded="false"
+            aria-controls="visualizer-panel-body">
+      <span>VISUALIZADOR</span><span class="collapse-mark">+</span>
+    </button>
+    <div class="module-body" id="visualizer-panel-body">
+      <div id="visualizer-placeholder" class="side-placeholder">
+        Selecione uma imagem no Explorador para visualizá-la aqui.
+      </div>
+      <div id="image-preview" hidden>
+        <div id="image-preview-tabs" role="tablist"
+             aria-label="Imagens abertas no visualizador"></div>
+        <div id="image-preview-toolbar">
+          <span id="image-preview-path"></span>
+          <button id="image-open-new" type="button">Abrir em nova aba</button>
+        </div>
+        <div id="image-preview-stage">
+          <img id="preview-image" alt="Pré-visualização da imagem selecionada">
+        </div>
+      </div>
+    </div>
+  </section>
+</section>
+
+<aside id="filhote-panel" aria-label="Assistente Filhote" hidden>
+  <div class="side-head">🐶 FILHOTE</div>
+  <div class="side-placeholder">Painel do assistente — espaço reservado para integração futura.</div>
+</aside>
+<button id="filhote-toggle" type="button" aria-expanded="false"
+        title="Mostrar ou ocultar Filhote">‹</button>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/lib/addon-fit.js"></script>
+
+<script>
+const statusEl = document.querySelector('#status');
+const term = new Terminal({
+  cursorBlink: true,
+  fontSize: 13,
+  fontFamily: 'Consolas, "Liberation Mono", monospace',
+  theme: {
+    background: '#080b09',
+    foreground: '#d9e5dc',
+    cursor: '#5cff95',
+    cursorAccent: '#080b09',
+    selectionBackground: '#31563d',
+    green: '#5cff95',
+    brightGreen: '#7bffaa'
+  },
+  scrollback: 5000,
+  convertEol: false
+});
+
+const fitAddon = new FitAddon.FitAddon();
+term.loadAddon(fitAddon);
+term.open(document.querySelector('#terminal'));
+fitAddon.fit();
+
+let ws = null;
+let reconnectTimer = null;
+let manuallyClosed = false;
+
+function setStatus(text, color) {
+  statusEl.textContent = text;
+  statusEl.style.color = color || '#ffd479';
+}
+
+function sendResize() {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({
+      type: 'resize',
+      rows: term.rows,
+      cols: term.cols
+    }));
+  }
+}
+
+function connect() {
+  clearTimeout(reconnectTimer);
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  ws = new WebSocket(`${proto}://${location.host}/ws`);
+
+  ws.onopen = () => {
+    setStatus('Conectado', 'var(--green)');
+    term.focus();
+    fitAddon.fit();
+    sendResize();
+  };
+
+  ws.onmessage = event => {
+    let message;
+    try { message = JSON.parse(event.data); }
+    catch { return; }
+
+    if (message.type === 'output') {
+      term.write(message.data);
+    } else if (message.type === 'status') {
+      setStatus(message.text, 'var(--green)');
+    } else if (message.type === 'error') {
+      term.writeln('\r\n[ SPIA ] ' + message.text);
+    }
+  };
+
+  ws.onclose = () => {
+    setStatus('Desconectado — tentando reconectar…', 'var(--red)');
+    if (!manuallyClosed) reconnectTimer = setTimeout(connect, 2500);
+  };
+
+  ws.onerror = () => setStatus('Falha de conexão', 'var(--red)');
+}
+
+term.onData(data => {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({type: 'input', data}));
+  }
+});
+
+term.onResize(() => sendResize());
+
+window.addEventListener('resize', () => {
+  fitAddon.fit();
+  sendResize();
+});
+
+document.querySelector('#paste').addEventListener('click', async () => {
+  try {
+    const text = await navigator.clipboard.readText();
+    if (text) term.paste(text);
+    term.focus();
+  } catch (error) {
+    setStatus('Não foi possível acessar a área de transferência. Verifique a permissão do navegador.', 'var(--red)');
+  }
+});
+
+document.querySelector('#run').addEventListener('click', () => {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({type: 'input', data: '\r'}));
+  } else {
+    setStatus('Terminal desconectado', 'var(--red)');
+  }
+  term.focus();
+});
+
+document.querySelector('#copy').addEventListener('click', async () => {
+  const selection = term.getSelection();
+
+  if (!selection) {
+    setStatus('Selecione um texto do terminal antes de copiar.', 'var(--red)');
+    term.focus();
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(selection);
+    setStatus('Texto copiado!', 'var(--green)');
+  } catch (error) {
+    setStatus('Não foi possível copiar. Verifique a permissão do navegador.', 'var(--red)');
+  }
+
+  term.focus();
+});
+
+document.querySelector('#clear').addEventListener('click', () => {
+  term.clear();
+  term.focus();
+});
+
+connect();
+
+// ---------- Painéis independentes e explorador SPIA ----------
+const panelTerminal = document.querySelector('#panel-terminal');
+const panelEditor = document.querySelector('#panel-editor');
+const panelVisualizer = document.querySelector('#panel-visualizer');
+const explorerPanel = document.querySelector('#explorer-panel');
+const explorerToggle = document.querySelector('#explorer-toggle');
+const filhotePanel = document.querySelector('#filhote-panel');
+const filhoteToggle = document.querySelector('#filhote-toggle');
+const fileList = document.querySelector('#file-list');
+const filePathInput = document.querySelector('#file-path');
+const editorContent = document.querySelector('#editor-content');
+const editorPlaceholder = document.querySelector('#editor-placeholder');
+const editorCurrentPath = document.querySelector('#editor-current-path');
+const editorMessage = document.querySelector('#editor-message');
+const editorSaveButton = document.querySelector('#editor-save');
+const editorReloadButton = document.querySelector('#editor-reload');
+
+const visualizerBody = document.querySelector('#visualizer-panel-body');
+const visualizerPlaceholder = document.querySelector('#visualizer-placeholder');
+const imagePreview = document.querySelector('#image-preview');
+const imagePreviewTabs = document.querySelector('#image-preview-tabs');
+const imagePreviewPath = document.querySelector('#image-preview-path');
+const previewImage = document.querySelector('#preview-image');
+const imageOpenNew = document.querySelector('#image-open-new');
+
+const visualizerTabs = new Map();
+let activeVisualizerPath = null;
+let previewImageUrl = null;
+
+
+let currentDirectory = '';
+let openedFilePath = null;
+let originalContent = null;
+let fileIsDirty = false;
+let explorerLoaded = false;
+
+function setPanelCollapsed(panel, collapsed) {
+  panel.dataset.collapsed = String(collapsed);
+  const head = panel.querySelector('.module-head');
+  const body = panel.querySelector('.module-body');
+  head.setAttribute('aria-expanded', String(!collapsed));
+  head.querySelector('.collapse-mark').textContent = collapsed ? '+' : '−';
+  body.hidden = collapsed;
+  if (!collapsed && panel === panelTerminal) {
+    requestAnimationFrame(() => {
+      fitAddon.fit();
+      sendResize();
+      term.focus();
+    });
+  }
+}
+
+document.querySelectorAll('.module-head').forEach((head) => {
+  head.addEventListener('click', () => {
+    const panel = head.closest('.module');
+    setPanelCollapsed(panel, panel.dataset.collapsed !== 'true');
+  });
+});
+
+explorerToggle.addEventListener('click', () => {
+  explorerPanel.hidden = !explorerPanel.hidden;
+  explorerToggle.setAttribute('aria-expanded', String(!explorerPanel.hidden));
+  if (!explorerPanel.hidden && !explorerLoaded) loadDirectory('');
+});
+
+filhoteToggle.addEventListener('click', () => {
+  filhotePanel.hidden = !filhotePanel.hidden;
+  filhoteToggle.setAttribute('aria-expanded', String(!filhotePanel.hidden));
+  filhoteToggle.textContent = filhotePanel.hidden ? '‹' : '›';
+});
+
+function setEditorMessage(message, isError = false) {
+  editorMessage.textContent = message;
+  editorMessage.style.color = isError ? 'var(--red)' : 'var(--muted)';
+}
+
+async function apiGet(url) {
+  const response = await fetch(url, {cache: 'no-store'});
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.detail || `Erro HTTP ${response.status}`);
+  }
+  return data;
+}
+
+function renderDirectory(items) {
+  fileList.replaceChildren();
+
+  if (!items.length) {
+    const empty = document.createElement('div');
+    empty.className = 'sub';
+    empty.textContent = 'Diretório vazio.';
+    fileList.append(empty);
+    return;
+  }
+
+  for (const item of items) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'file-entry';
+    const ext = item.name.includes('.') ? '.' + item.name.split('.').pop().toLowerCase() : '';
+    button.textContent = item.type === 'directory'
+      ? '📁 ' + item.name
+      : (imageExtensions.has(ext) ? '🖼️ ' : '📄 ') + item.name;
+    button.title = item.path;
+
+    if (item.type === 'directory') {
+      button.addEventListener('click', () => loadDirectory(item.path));
+    } else {
+      if (item.path === openedFilePath) button.classList.add('active');
+      button.addEventListener('click', () => openFile(item.path));
+
+      if (item.name.toLowerCase().endsWith('.py')) {
+        button.addEventListener('contextmenu', (event) => {
+          event.preventDefault();
+          showPythonContextMenu(event.clientX, event.clientY, item.path);
+        });
+      }
+    }
+
+    fileList.append(button);
+  }
+}
+
+// Menu de contexto para scripts Python: prepara o comando, mas não o executa.
+const pythonContextMenu = document.createElement('div');
+pythonContextMenu.id = 'python-context-menu';
+pythonContextMenu.hidden = true;
+Object.assign(pythonContextMenu.style, {
+  position: 'fixed',
+  zIndex: '9999',
+  minWidth: '210px',
+  padding: '5px',
+  background: '#20252d',
+  color: '#e8edf2',
+  border: '1px solid #596575',
+  borderRadius: '6px',
+  boxShadow: '0 6px 20px #0008'
+});
+
+const sendPythonCommandButton = document.createElement('button');
+sendPythonCommandButton.type = 'button';
+sendPythonCommandButton.textContent = 'Enviar comando ao Terminal';
+Object.assign(sendPythonCommandButton.style, {
+  display: 'block',
+  width: '100%',
+  padding: '9px 11px',
+  border: '0',
+  borderRadius: '4px',
+  background: 'transparent',
+  color: 'inherit',
+  textAlign: 'left',
+  cursor: 'pointer',
+  font: 'inherit'
+});
+sendPythonCommandButton.addEventListener('mouseenter', () => {
+  sendPythonCommandButton.style.background = '#354252';
+});
+sendPythonCommandButton.addEventListener('mouseleave', () => {
+  sendPythonCommandButton.style.background = 'transparent';
+});
+pythonContextMenu.append(sendPythonCommandButton);
+
+function createPythonMenuButton(label, icon) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.textContent = icon + ' ' + label;
+  Object.assign(button.style, {
+    display: 'block',
+    width: '100%',
+    padding: '9px 11px',
+    border: '0',
+    borderRadius: '4px',
+    background: 'transparent',
+    color: 'inherit',
+    textAlign: 'left',
+    cursor: 'pointer',
+    font: 'inherit'
+  });
+  button.addEventListener('mouseenter', () => {
+    button.style.background = '#354252';
+  });
+  button.addEventListener('mouseleave', () => {
+    button.style.background = 'transparent';
+  });
+  pythonContextMenu.append(button);
+  return button;
+}
+
+const openPythonEditorButton =
+  createPythonMenuButton('Abrir no Editor', '📝');
+const copyPythonCodeButton =
+  createPythonMenuButton('Copiar código', '📋');
+const copyPythonPathButton =
+  createPythonMenuButton('Copiar caminho', '📁');
+
+document.body.append(pythonContextMenu);
+
+let pendingPythonPath = null;
+
+function hidePythonContextMenu() {
+  pythonContextMenu.hidden = true;
+  pendingPythonPath = null;
+}
+
+function showPythonContextMenu(x, y, path) {
+  pendingPythonPath = path;
+  pythonContextMenu.hidden = false;
+
+  // Ajusta a posição para não deixar o menu sair da janela.
+  const width = pythonContextMenu.offsetWidth;
+  const height = pythonContextMenu.offsetHeight;
+  pythonContextMenu.style.left = Math.max(4, Math.min(x, window.innerWidth - width - 4)) + 'px';
+  pythonContextMenu.style.top = Math.max(4, Math.min(y, window.innerHeight - height - 4)) + 'px';
+}
+
+sendPythonCommandButton.addEventListener('click', () => {
+  const path = pendingPythonPath;
+  hidePythonContextMenu();
+  if (!path) return;
+
+  if (!ws || ws.readyState !== WebSocket.OPEN) {
+    setStatus('Terminal desconectado', 'var(--red)');
+    return;
+  }
+
+  // Aspas simples seguras para caminhos com espaços ou apóstrofos.
+  const quotedPath = "'" + path.replace(/'/g, "'\\''") + "'";
+  setPanelCollapsed(panelTerminal, false);
+  term.paste('python ' + quotedPath);
+  term.focus();
+  setStatus('Comando inserido — revise os argumentos e pressione Enter.', 'var(--green)');
+});
+
+openPythonEditorButton.addEventListener('click', async () => {
+  const path = pendingPythonPath;
+  hidePythonContextMenu();
+  if (path) await openFile(path);
+});
+
+copyPythonCodeButton.addEventListener('click', async () => {
+  const path = pendingPythonPath;
+  hidePythonContextMenu();
+  if (!path) return;
+
+  try {
+    const data = await apiGet('/api/file?path=' + encodeURIComponent(path));
+    await navigator.clipboard.writeText(data.content);
+    setStatus('Código copiado: ' + path, 'var(--green)');
+  } catch (error) {
+    setStatus('Não foi possível copiar o código: ' + error.message, 'var(--red)');
+  }
+});
+
+copyPythonPathButton.addEventListener('click', async () => {
+  const path = pendingPythonPath;
+  hidePythonContextMenu();
+  if (!path) return;
+
+  try {
+    await navigator.clipboard.writeText(path);
+    setStatus('Caminho copiado: ' + path, 'var(--green)');
+  } catch (error) {
+    setStatus('Não foi possível copiar o caminho. Verifique a permissão da área de transferência.', 'var(--red)');
+  }
+});
+
+document.addEventListener('click', (event) => {
+  if (!pythonContextMenu.contains(event.target)) hidePythonContextMenu();
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') hidePythonContextMenu();
+});
+window.addEventListener('blur', hidePythonContextMenu);
+
+async function loadDirectory(path) {
+  fileList.textContent = 'Carregando…';
+  try {
+    const data = await apiGet('/api/files?path=' + encodeURIComponent(path));
+    currentDirectory = data.path || '';
+    filePathInput.value = '/' + currentDirectory;
+    renderDirectory(data.items || []);
+    explorerLoaded = true;
+  } catch (error) {
+    fileList.textContent = 'Não foi possível listar este diretório.';
+    setEditorMessage(error.message, true);
+  }
+}
+
+const imageExtensions = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp']);
+
+function showVisualizer() {
+  setPanelCollapsed(panelVisualizer, false);
+  visualizerBody.hidden = false;
+}
+
+function renderVisualizerTabs() {
+  imagePreviewTabs.replaceChildren();
+
+  for (const [path] of visualizerTabs) {
+    const tab = document.createElement('button');
+    tab.type = 'button';
+    tab.className = 'image-preview-tab';
+    tab.setAttribute('role', 'tab');
+    tab.setAttribute('aria-selected', String(path === activeVisualizerPath));
+
+    if (path === activeVisualizerPath) {
+      tab.classList.add('active');
+    }
+
+    const label = document.createElement('span');
+    label.className = 'image-preview-tab-label';
+    label.textContent = path.split('/').pop() || path;
+    label.title = path;
+
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'image-preview-tab-close';
+    close.textContent = '×';
+    close.title = 'Fechar visualização';
+    close.setAttribute('aria-label', 'Fechar ' + path);
+
+    close.addEventListener('click', (event) => {
+      event.stopPropagation();
+      closeVisualizerTab(path);
+    });
+
+    tab.addEventListener('click', () => {
+      activateVisualizerTab(path);
+    });
+
+    tab.append(label, close);
+    imagePreviewTabs.append(tab);
+  }
+}
+
+function activateVisualizerTab(path) {
+  const tabData = visualizerTabs.get(path);
+  if (!tabData) return;
+
+  activeVisualizerPath = path;
+  imagePreview.hidden = false;
+  visualizerPlaceholder.hidden = true;
+
+  imagePreviewPath.textContent = path;
+  imagePreviewPath.title = path;
+
+  imageOpenNew.disabled = true;
+
+  if (previewImageUrl) {
+    URL.revokeObjectURL(previewImageUrl);
+    previewImageUrl = null;
+  }
+
+  const url = '/api/image?path=' + encodeURIComponent(path);
+  previewImageUrl = url;
+
+  previewImage.onload = () => {
+    if (activeVisualizerPath === path) {
+      imageOpenNew.disabled = false;
+      visualizerPlaceholder.hidden = true;
+    }
+  };
+
+  previewImage.onerror = () => {
+    if (activeVisualizerPath !== path) return;
+
+    imagePreview.hidden = true;
+    visualizerPlaceholder.hidden = false;
+    visualizerPlaceholder.textContent =
+      'Não foi possível exibir esta imagem.';
+    imageOpenNew.disabled = true;
+  };
+
+  previewImage.src = url;
+
+  imageOpenNew.onclick = () => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  renderVisualizerTabs();
+}
+
+function closeVisualizerTab(path) {
+  visualizerTabs.delete(path);
+
+  if (activeVisualizerPath === path) {
+    const remaining = Array.from(visualizerTabs.keys());
+
+    if (remaining.length) {
+      activateVisualizerTab(remaining[remaining.length - 1]);
+      return;
+    }
+
+    activeVisualizerPath = null;
+    imagePreview.hidden = true;
+    visualizerPlaceholder.hidden = false;
+    visualizerPlaceholder.textContent =
+      'Selecione uma imagem no Explorador para visualizá-la aqui.';
+    imagePreviewPath.textContent = '';
+    previewImage.removeAttribute('src');
+    imageOpenNew.disabled = true;
+  }
+
+  renderVisualizerTabs();
+}
+
+function showVisualizer() {
+  setPanelCollapsed(panelVisualizer, false);
+  visualizerBody.hidden = false;
+}
+
+async function openImage(path) {
+  showVisualizer();
+
+  if (!visualizerTabs.has(path)) {
+    visualizerTabs.set(path, {
+      path,
+      openedAt: Date.now()
+    });
+  }
+
+  activateVisualizerTab(path);
+}
+
+
+async function openFile(path) {
+  const extension = path.includes('.')
+    ? '.' + path.split('.').pop().toLowerCase()
+    : '';
+
+  if (imageExtensions.has(extension)) {
+    await openImage(path);
+    return;
+  }
+
+  if (fileIsDirty &&
+      !confirm('Há alterações não salvas. Descartar e abrir outro arquivo?')) {
+    return;
+  }
+
+  setEditorMessage('Abrindo arquivo…');
+  try {
+    const data = await apiGet('/api/file?path=' + encodeURIComponent(path));
+    openedFilePath = data.path;
+    originalContent = data.content;
+    editorContent.value = data.content;
+    editorContent.hidden = false;
+    editorPlaceholder.hidden = true;
+    editorCurrentPath.textContent = data.path;
+    fileIsDirty = false;
+    editorSaveButton.disabled = true;
+    editorReloadButton.disabled = false;
+    setEditorMessage('Arquivo aberto. Salvamento será habilitado na próxima etapa.');
+    setPanelCollapsed(panelEditor, false);
+    renderDirectory((await apiGet(
+      '/api/files?path=' + encodeURIComponent(currentDirectory)
+    )).items || []);
+  } catch (error) {
+    setEditorMessage(error.message, true);
+  }
+}
+
+editorContent.addEventListener('input', () => {
+  fileIsDirty = editorContent.value !== originalContent;
+  editorSaveButton.disabled = !openedFilePath || !fileIsDirty;
+  setEditorMessage(fileIsDirty ? 'Alterações não salvas.' : 'Sem alterações pendentes.');
+});
+
+document.querySelector('#files-refresh').addEventListener('click', () => {
+  loadDirectory(currentDirectory);
+});
+
+document.querySelector('#files-up').addEventListener('click', () => {
+  if (!currentDirectory) return;
+  const parts = currentDirectory.split('/').filter(Boolean);
+  parts.pop();
+  loadDirectory(parts.join('/'));
+});
+
+editorReloadButton.addEventListener('click', () => {
+  if (openedFilePath) openFile(openedFilePath);
+});
+
+// O botão fica deliberadamente desabilitado até conectarmos o salvamento seguro.
+editorSaveButton.addEventListener('click', () => {
+  setEditorMessage('Salvamento ainda não habilitado.', true);
+});
+
+window.addEventListener('resize', () => {
+  if (panelTerminal.dataset.collapsed !== 'true') {
+    requestAnimationFrame(() => {
+      fitAddon.fit();
+      sendResize();
+    });
+  }
+});
+
+</script>
+</body>
+</html>

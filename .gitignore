@@ -32,3 +32,11 @@ outputs/reports/taxa_falsos_positivos_1000/catalogos_gerados.csv
 # Backups locais de scripts (não versionar)
 *.py.bak
 *.py.pre_correcao
+
+# SPIA - backups locais e arquivos temporários
+web/spia_terminal_demo/*.bak
+web/spia_terminal_demo/*.bak-*
+web/spia_terminal_demo/__pycache__/
+web/spia_terminal_demo/*.pyc
+web/spia_silicon_puppy_workstation.html:Zone.Identifier
+web/spia_terminal_demo/terminal.html.bak*
