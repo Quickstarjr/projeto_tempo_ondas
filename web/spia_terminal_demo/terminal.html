@@ -936,10 +936,31 @@ term.onData(data => {
 
 term.onResize(() => sendResize());
 
-window.addEventListener('resize', () => {
-  fitAddon.fit();
-  sendResize();
-});
+// Ajusta o terminal quando seu contêiner muda de tamanho,
+// mesmo que a janela do navegador permaneça igual.
+let fitScheduled = false;
+
+function scheduleTerminalFit() {
+  if (fitScheduled || panelTerminal?.dataset.collapsed === 'true') return;
+  fitScheduled = true;
+
+  requestAnimationFrame(() => {
+    fitScheduled = false;
+
+    const container = document.querySelector('#terminal');
+    if (!container || container.clientWidth === 0 || container.clientHeight === 0) {
+      return;
+    }
+
+    fitAddon.fit();
+    sendResize();
+  });
+}
+
+const terminalResizeObserver = new ResizeObserver(scheduleTerminalFit);
+terminalResizeObserver.observe(document.querySelector('#terminal'));
+
+window.addEventListener('resize', scheduleTerminalFit);
 
 document.querySelector('#paste').addEventListener('click', async () => {
   try {
