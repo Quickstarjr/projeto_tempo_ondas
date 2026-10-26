@@ -217,11 +217,83 @@ button:hover { background: #2a5038; }
   justify-content: space-between;
   gap: 10px;
 }
+#editor-state {
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+#editor-state[data-state="clean"] {
+  color: var(--green);
+  border-color: #326346;
+}
+#editor-state[data-state="dirty"] {
+  color: #ffd479;
+  border-color: #8a6a2c;
+}
+#editor-state[data-state="closed"] {
+  color: var(--muted);
+}
 #editor-current-path {
   color: var(--muted);
   font-size: 12px;
   overflow-wrap: anywhere;
 }
+#editor-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  flex: 0 0 auto;
+  min-height: 38px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-bottom: 1px solid var(--border);
+  background: #101512;
+}
+#editor-tabs[hidden] { display: none !important; }
+.editor-tab {
+  display: inline-flex;
+  align-items: stretch;
+  flex: 0 0 auto;
+  max-width: 280px;
+  border-right: 1px solid var(--border);
+  background: #141916;
+}
+.editor-tab.active {
+  background: #203d2b;
+  box-shadow: inset 0 -2px 0 var(--green);
+}
+.editor-tab-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 8px 8px 8px 10px;
+  border: 0;
+  border-radius: 0;
+  color: var(--muted);
+  background: transparent;
+  text-align: left;
+  white-space: nowrap;
+}
+.editor-tab.active .editor-tab-select { color: var(--green); }
+.editor-tab-select:hover { background: #1b2720; }
+.editor-tab-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 210px;
+}
+.editor-tab-dirty { color: #ffd479; font-size: 11px; }
+.editor-tab-close {
+  align-self: center;
+  padding: 2px 6px;
+  border: 0;
+  border-radius: 4px;
+  color: var(--muted);
+  background: transparent;
+}
+.editor-tab-close:hover { color: #fff; background: #3a4b40; }
 #editor-placeholder {
   padding: 24px;
   color: var(--muted);
@@ -240,6 +312,45 @@ button:hover { background: #2a5038; }
   tab-size: 2;
 }
 #editor-content:focus { box-shadow: inset 0 0 0 1px #326346; }
+
+/* Editor com coluna de números de linha sincronizada */
+#editor-edit-area {
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: #080b09;
+}
+
+#editor-edit-area[hidden] {
+  display: none !important;
+}
+
+#editor-line-numbers {
+  flex: 0 0 48px;
+  min-height: 0;
+  overflow: hidden;
+  padding: 14px 9px 14px 4px;
+  border-right: 1px solid var(--border);
+  color: #718579;
+  background: #101512;
+  text-align: right;
+  white-space: pre;
+  user-select: none;
+  font: 13px/1.5 Consolas, "Liberation Mono", monospace;
+}
+
+#editor-content {
+  display: block;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: auto;
+  white-space: pre;
+  overflow-wrap: normal;
+}
 .editor-footer {
   display: flex;
   flex-wrap: wrap;
@@ -401,6 +512,67 @@ main {
 .side-placeholder {
   padding: 12px;
   color: var(--muted);
+}
+
+/* Conteúdo interno do painel direito: monitor + Filhote */
+#resource-monitor,
+#filhote-assistant {
+  min-height: 0;
+  overflow: auto;
+}
+
+#resource-monitor {
+  flex: 0 0 auto;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
+}
+
+#filhote-assistant {
+  flex: 1 1 auto;
+}
+
+.side-subhead {
+  padding: 9px 10px;
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border);
+}
+
+.resource-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  padding: 10px;
+}
+
+.resource-card {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg, transparent);
+}
+
+.resource-card span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.resource-card strong {
+  color: var(--green);
+  font-size: 17px;
+  overflow-wrap: anywhere;
+}
+
+.resource-note {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
 }
 #visualizer-placeholder {
   padding: 18px;
@@ -590,12 +762,20 @@ main {
             <span>Arquivo aberto</span>
             <span id="editor-current-path">Nenhum arquivo aberto</span>
           </div>
+          <div id="editor-tabs" role="tablist"
+               aria-label="Arquivos abertos no editor" hidden></div>
           <div id="editor-placeholder">Selecione um arquivo no Explorador para começar.</div>
-          <textarea id="editor-content" spellcheck="false"
-                    aria-label="Conteúdo do arquivo" hidden></textarea>
+          <div id="editor-edit-area" hidden>
+            <div id="editor-line-numbers" aria-hidden="true">1</div>
+            <textarea id="editor-content" spellcheck="false"
+                      wrap="off" aria-label="Conteúdo do arquivo"></textarea>
+          </div>
           <footer class="editor-footer">
+            <button id="editor-copy-code" type="button" disabled>Copiar código</button>
+            <button id="editor-copy-path" type="button" disabled>Copiar caminho</button>
             <button id="editor-save" type="button" disabled>Salvar</button>
             <button id="editor-reload" type="button" disabled>Reabrir</button>
+            <span id="editor-state" data-state="closed">Sem arquivo</span>
             <span id="editor-message">Nenhum arquivo aberto.</span>
           </footer>
         </section>
@@ -628,9 +808,41 @@ main {
   </section>
 </section>
 
-<aside id="filhote-panel" aria-label="Assistente Filhote" hidden>
-  <div class="side-head">🐶 FILHOTE</div>
-  <div class="side-placeholder">Painel do assistente — espaço reservado para integração futura.</div>
+<aside id="filhote-panel" aria-label="Monitor de recursos e assistente Filhote" hidden>
+  <div class="side-head" id="spia-clock">🕒 SPIA · --:--:--</div>
+
+  <section id="resource-monitor" aria-label="Monitor de recursos">
+    <div class="side-subhead">📊 MONITOR DE RECURSOS</div>
+    <div class="resource-grid">
+      <div class="resource-card">
+        <span>CPU do sistema</span>
+        <strong id="system-cpu">—</strong>
+      </div>
+      <div class="resource-card">
+        <span>RAM do sistema</span>
+        <strong id="system-ram">—</strong>
+      </div>
+      <div class="resource-card">
+        <span>CPU do processo</span>
+        <strong id="process-cpu">—</strong>
+      </div>
+      <div class="resource-card">
+        <span>RAM do processo</span>
+        <strong id="process-ram">—</strong>
+      </div>
+      <div class="resource-note" id="process-status">
+        Monitor visual — aguardando integração com o servidor.
+      </div>
+    </div>
+  </section>
+
+  <section id="filhote-assistant" aria-label="Assistente Filhote">
+    <div class="side-subhead">🐶 FILHOTE</div>
+    <div class="side-placeholder">
+      Assistente científico da SPIA.<br>
+      Espaço reservado para a integração do assistente.
+    </div>
+  </section>
 </aside>
 <button id="filhote-toggle" type="button" aria-expanded="false"
         title="Mostrar ou ocultar Filhote">‹</button>
@@ -784,12 +996,20 @@ const filhotePanel = document.querySelector('#filhote-panel');
 const filhoteToggle = document.querySelector('#filhote-toggle');
 const fileList = document.querySelector('#file-list');
 const filePathInput = document.querySelector('#file-path');
+const editorEditArea = document.querySelector('#editor-edit-area');
+const editorLineNumbers = document.querySelector('#editor-line-numbers');
 const editorContent = document.querySelector('#editor-content');
 const editorPlaceholder = document.querySelector('#editor-placeholder');
 const editorCurrentPath = document.querySelector('#editor-current-path');
 const editorMessage = document.querySelector('#editor-message');
 const editorSaveButton = document.querySelector('#editor-save');
 const editorReloadButton = document.querySelector('#editor-reload');
+const editorCopyCodeButton = document.querySelector('#editor-copy-code');
+const editorCopyPathButton = document.querySelector('#editor-copy-path');
+const editorState = document.querySelector('#editor-state');
+const editorTabsElement = document.querySelector('#editor-tabs');
+const editorTabs = new Map();
+
 
 const visualizerBody = document.querySelector('#visualizer-panel-body');
 const visualizerPlaceholder = document.querySelector('#visualizer-placeholder');
@@ -807,6 +1027,7 @@ let previewImageUrl = null;
 let currentDirectory = '';
 let openedFilePath = null;
 let originalContent = null;
+let originalSha256 = null;
 let fileIsDirty = false;
 let explorerLoaded = false;
 
@@ -848,6 +1069,26 @@ filhoteToggle.addEventListener('click', () => {
 function setEditorMessage(message, isError = false) {
   editorMessage.textContent = message;
   editorMessage.style.color = isError ? 'var(--red)' : 'var(--muted)';
+}
+
+async function apiPost(url, payload) {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.detail || `Erro HTTP ${response.status}`);
+  }
+  return data;
+}
+
+async function sha256Hex(text) {
+  const bytes = new TextEncoder().encode(text);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(digest),
+    byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
 async function apiGet(url) {
@@ -1123,10 +1364,9 @@ function activateVisualizerTab(path) {
 
   imageOpenNew.disabled = true;
 
-  if (previewImageUrl) {
-    URL.revokeObjectURL(previewImageUrl);
-    previewImageUrl = null;
-  }
+  // A pré-visualização usa uma URL HTTP, não uma URL criada por
+  // URL.createObjectURL(); portanto, não há objeto Blob para revogar.
+  previewImageUrl = null;
 
   const url = '/api/image?path=' + encodeURIComponent(path);
   previewImageUrl = url;
@@ -1200,6 +1440,135 @@ async function openImage(path) {
 }
 
 
+function saveActiveEditorState() {
+  if (!openedFilePath || !editorTabs.has(openedFilePath)) return;
+  const tab = editorTabs.get(openedFilePath);
+  tab.content = editorContent.value;
+  tab.originalContent = originalContent;
+  tab.originalSha256 = originalSha256;
+  tab.dirty = fileIsDirty;
+}
+
+function renderEditorTabs() {
+  editorTabsElement.replaceChildren();
+  editorTabsElement.hidden = editorTabs.size === 0;
+
+  for (const [path, data] of editorTabs) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'editor-tab' +
+      (path === openedFilePath ? ' active' : '');
+
+    const select = document.createElement('button');
+    select.type = 'button';
+    select.className = 'editor-tab-select';
+    select.setAttribute('role', 'tab');
+    select.setAttribute('aria-selected', String(path === openedFilePath));
+    select.title = path;
+
+    const label = document.createElement('span');
+    label.className = 'editor-tab-label';
+    label.textContent = path.split('/').pop() || path;
+    label.title = path;
+    select.append(label);
+
+    if (data.dirty) {
+      const dirty = document.createElement('span');
+      dirty.className = 'editor-tab-dirty';
+      dirty.textContent = '●';
+      dirty.title = 'Alterações não salvas';
+      select.append(dirty);
+    }
+
+    select.addEventListener('click', () => activateEditorTab(path));
+
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'editor-tab-close';
+    close.textContent = '×';
+    close.title = 'Fechar arquivo';
+    close.setAttribute('aria-label', 'Fechar ' + path);
+    close.addEventListener('click', (event) => {
+      event.stopPropagation();
+      closeEditorTab(path);
+    });
+
+    wrapper.append(select, close);
+    editorTabsElement.append(wrapper);
+  }
+}
+
+function activateEditorTab(path) {
+  if (!editorTabs.has(path)) return;
+
+  saveActiveEditorState();
+  const tab = editorTabs.get(path);
+
+  openedFilePath = path;
+  originalContent = tab.originalContent;
+  originalSha256 = tab.originalSha256;
+  fileIsDirty = tab.dirty;
+  editorContent.value = tab.content;
+
+  editorEditArea.hidden = false;
+  editorPlaceholder.hidden = true;
+  editorCurrentPath.textContent = path;
+  editorCurrentPath.title = path;
+  editorSaveButton.disabled = !fileIsDirty;
+  editorReloadButton.disabled = false;
+  editorCopyCodeButton.disabled = false;
+  editorCopyPathButton.disabled = false;
+
+  updateEditorLineNumbers();
+  updateEditorState();
+  renderEditorTabs();
+  setPanelCollapsed(panelEditor, false);
+  setEditorMessage(fileIsDirty
+    ? 'Arquivo com alterações não salvas.'
+    : 'Arquivo aberto sem alterações pendentes.');
+}
+
+function closeEditorTab(path) {
+  const tab = editorTabs.get(path);
+  if (!tab) return;
+
+  if (path === openedFilePath) saveActiveEditorState();
+
+  if (tab.dirty && !confirm(
+    'O arquivo "' + path +
+    '" tem alterações não salvas. Fechar e descartar essas alterações?'
+  )) return;
+
+  editorTabs.delete(path);
+
+  if (path === openedFilePath) {
+    const nextPath = editorTabs.keys().next().value;
+    openedFilePath = null;
+
+    if (nextPath) {
+      activateEditorTab(nextPath);
+    } else {
+      originalContent = null;
+      originalSha256 = null;
+      fileIsDirty = false;
+      editorContent.value = '';
+      editorEditArea.hidden = true;
+      editorPlaceholder.hidden = false;
+      editorCurrentPath.textContent = 'Nenhum arquivo aberto';
+      editorCurrentPath.removeAttribute('title');
+      editorSaveButton.disabled = true;
+      editorReloadButton.disabled = true;
+      editorCopyCodeButton.disabled = true;
+      editorCopyPathButton.disabled = true;
+      updateEditorLineNumbers();
+      updateEditorState();
+      renderEditorTabs();
+      setEditorMessage('Nenhum arquivo aberto.');
+    }
+  } else {
+    renderEditorTabs();
+  }
+}
+
 async function openFile(path) {
   const extension = path.includes('.')
     ? '.' + path.split('.').pop().toLowerCase()
@@ -1210,26 +1579,24 @@ async function openFile(path) {
     return;
   }
 
-  if (fileIsDirty &&
-      !confirm('Há alterações não salvas. Descartar e abrir outro arquivo?')) {
+  if (editorTabs.has(path)) {
+    activateEditorTab(path);
     return;
   }
 
   setEditorMessage('Abrindo arquivo…');
   try {
     const data = await apiGet('/api/file?path=' + encodeURIComponent(path));
-    openedFilePath = data.path;
-    originalContent = data.content;
-    editorContent.value = data.content;
-    editorContent.hidden = false;
-    editorPlaceholder.hidden = true;
-    editorCurrentPath.textContent = data.path;
-    fileIsDirty = false;
-    editorSaveButton.disabled = true;
-    editorReloadButton.disabled = false;
-    setEditorMessage('Arquivo aberto. Salvamento será habilitado na próxima etapa.');
-    setPanelCollapsed(panelEditor, false);
-    renderDirectory((await apiGet(
+    editorTabs.set(data.path, {
+      path: data.path,
+      content: data.content,
+      originalContent: data.content,
+      originalSha256: await sha256Hex(data.content),
+      dirty: false
+    });
+
+    activateEditorTab(data.path);
+    await renderDirectory((await apiGet(
       '/api/files?path=' + encodeURIComponent(currentDirectory)
     )).items || []);
   } catch (error) {
@@ -1237,10 +1604,34 @@ async function openFile(path) {
   }
 }
 
+function updateEditorLineNumbers() {
+  const count = editorContent.value.split('\n').length;
+  editorLineNumbers.textContent = Array.from(
+    { length: count }, (_, i) => i + 1
+  ).join('\n');
+  editorLineNumbers.scrollTop = editorContent.scrollTop;
+}
+
+editorContent.addEventListener('scroll', () => {
+  editorLineNumbers.scrollTop = editorContent.scrollTop;
+});
+
 editorContent.addEventListener('input', () => {
+  updateEditorLineNumbers();
   fileIsDirty = editorContent.value !== originalContent;
+
+  if (openedFilePath && editorTabs.has(openedFilePath)) {
+    const tab = editorTabs.get(openedFilePath);
+    tab.content = editorContent.value;
+    tab.dirty = fileIsDirty;
+  }
+
   editorSaveButton.disabled = !openedFilePath || !fileIsDirty;
-  setEditorMessage(fileIsDirty ? 'Alterações não salvas.' : 'Sem alterações pendentes.');
+  updateEditorState();
+  renderEditorTabs();
+  setEditorMessage(fileIsDirty
+    ? 'Alterações não salvas.'
+    : 'Sem alterações pendentes.');
 });
 
 document.querySelector('#files-refresh').addEventListener('click', () => {
@@ -1254,15 +1645,125 @@ document.querySelector('#files-up').addEventListener('click', () => {
   loadDirectory(parts.join('/'));
 });
 
-editorReloadButton.addEventListener('click', () => {
-  if (openedFilePath) openFile(openedFilePath);
+editorReloadButton.addEventListener('click', async () => {
+  if (!openedFilePath) return;
+
+  const path = openedFilePath;
+  const tab = editorTabs.get(path);
+  if (tab?.dirty && !confirm(
+    'Descartar as alterações não salvas e reabrir o arquivo?'
+  )) return;
+
+  setEditorMessage('Reabrindo arquivo…');
+  try {
+    const data = await apiGet('/api/file?path=' + encodeURIComponent(path));
+    const refreshed = {
+      path: data.path,
+      content: data.content,
+      originalContent: data.content,
+      originalSha256: await sha256Hex(data.content),
+      dirty: false
+    };
+    editorTabs.set(data.path, refreshed);
+    activateEditorTab(data.path);
+    setEditorMessage('Arquivo reaberto do disco.');
+  } catch (error) {
+    setEditorMessage(error.message, true);
+  }
 });
 
-// O botão fica deliberadamente desabilitado até conectarmos o salvamento seguro.
-editorSaveButton.addEventListener('click', () => {
-  setEditorMessage('Salvamento ainda não habilitado.', true);
+function updateEditorState() {
+  if (!openedFilePath) {
+    editorState.textContent = 'Sem arquivo';
+    editorState.dataset.state = 'closed';
+  } else if (fileIsDirty) {
+    editorState.textContent = '● Modificado';
+    editorState.dataset.state = 'dirty';
+  } else {
+    editorState.textContent = '✓ Sem alterações';
+    editorState.dataset.state = 'clean';
+  }
+}
+
+editorCopyCodeButton.addEventListener('click', async () => {
+  if (!openedFilePath) return;
+  try {
+    await navigator.clipboard.writeText(editorContent.value);
+    setEditorMessage('Conteúdo do arquivo copiado.');
+  } catch (error) {
+    setEditorMessage('Não foi possível copiar o código: ' + error.message, true);
+  }
 });
 
+editorCopyPathButton.addEventListener('click', async () => {
+  if (!openedFilePath) return;
+  try {
+    await navigator.clipboard.writeText(openedFilePath);
+    setEditorMessage('Caminho copiado: ' + openedFilePath);
+  } catch (error) {
+    setEditorMessage('Não foi possível copiar o caminho: ' + error.message, true);
+  }
+});
+
+editorSaveButton.addEventListener('click', async () => {
+  if (!openedFilePath || !fileIsDirty || !originalSha256) return;
+
+  const path = openedFilePath;
+  const contentToSave = editorContent.value;
+  const expectedSha256 = originalSha256;
+
+  editorSaveButton.disabled = true;
+  setEditorMessage('Salvando arquivo…');
+
+  try {
+    const result = await apiPost('/api/file', {
+      path,
+      content: contentToSave,
+      expected_sha256: expectedSha256
+    });
+
+    if (!result.saved || !result.sha256) {
+      throw new Error('O servidor não confirmou a gravação.');
+    }
+
+    const tab = editorTabs.get(path);
+    if (tab) {
+      tab.originalContent = contentToSave;
+      tab.originalSha256 = result.sha256;
+
+      // Se o usuário ainda está nesta aba, sincroniza o conteúdo atual.
+      if (openedFilePath === path) {
+        tab.content = editorContent.value;
+        tab.dirty = editorContent.value !== contentToSave;
+      } else {
+        tab.content = contentToSave;
+        tab.dirty = false;
+      }
+    }
+
+    if (openedFilePath === path) {
+      originalContent = contentToSave;
+      originalSha256 = result.sha256;
+      fileIsDirty = editorContent.value !== contentToSave;
+      editorSaveButton.disabled = !fileIsDirty;
+      updateEditorState();
+    }
+
+    renderEditorTabs();
+    setEditorMessage(
+      fileIsDirty
+        ? 'Arquivo salvo; há novas alterações pendentes.'
+        : 'Arquivo salvo com sucesso.'
+    );
+    await loadDirectory(currentDirectory);
+  } catch (error) {
+    if (openedFilePath === path) {
+      editorSaveButton.disabled =
+        !fileIsDirty || !openedFilePath || !originalSha256;
+    }
+    setEditorMessage(error.message, true);
+  }
+});
 window.addEventListener('resize', () => {
   if (panelTerminal.dataset.collapsed !== 'true') {
     requestAnimationFrame(() => {
@@ -1271,6 +1772,68 @@ window.addEventListener('resize', () => {
     });
   }
 });
+
+
+
+// Monitor real de CPU/RAM. Falhas aqui não interferem no terminal Bash.
+const monitorStatus = document.querySelector('#process-status');
+const systemCpuEl = document.querySelector('#system-cpu');
+const systemRamEl = document.querySelector('#system-ram');
+const processCpuEl = document.querySelector('#process-cpu');
+const processRamEl = document.querySelector('#process-ram');
+
+function formatBytes(bytes) {
+  if (!Number.isFinite(bytes) || bytes < 0) return '—';
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  let value = bytes;
+  let unit = 0;
+  while (value >= 1024 && unit < units.length - 1) {
+    value /= 1024;
+    unit++;
+  }
+  return `${value.toFixed(unit >= 2 ? 1 : 0)} ${units[unit]}`;
+}
+
+async function updateResourceMonitor() {
+  try {
+    const response = await fetch('/api/monitor', { cache: 'no-store' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+
+    const cpu = data.system.cpu_percent;
+    systemCpuEl.textContent = cpu == null ? 'Amostrando…' : `${cpu.toFixed(1)}%`;
+    systemRamEl.textContent =
+      `${data.system.percent.toFixed(1)}% · ${formatBytes(data.system.used_bytes)}`;
+
+    const processCpu = data.process.cpu_percent;
+    processCpuEl.textContent =
+      processCpu == null ? 'Amostrando…' : `${processCpu.toFixed(1)}%`;
+    processRamEl.textContent = formatBytes(data.process.ram_bytes);
+
+    const stamp = new Date(data.timestamp * 1000)
+      .toLocaleTimeString('pt-BR', { hour12: false });
+    monitorStatus.textContent =
+      `Atualizado ${stamp} · PID Python ${data.process.pid}`;
+    monitorStatus.style.color = 'var(--muted)';
+  } catch (error) {
+    monitorStatus.textContent = `Monitor indisponível: ${error.message}`;
+    monitorStatus.style.color = 'var(--red)';
+  }
+}
+
+updateResourceMonitor();
+setInterval(updateResourceMonitor, 1500);
+
+
+// Relógio local da SPIA — independente dos controles dos painéis.
+const spiaClock = document.querySelector('#spia-clock');
+function updateSpiaClock() {
+  if (!spiaClock) return;
+  spiaClock.textContent = '🕒 SPIA · ' +
+    new Date().toLocaleTimeString('pt-BR', { hour12: false });
+}
+updateSpiaClock();
+setInterval(updateSpiaClock, 1000);
 
 </script>
 </body>

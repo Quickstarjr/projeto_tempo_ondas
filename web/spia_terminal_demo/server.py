@@ -12,6 +12,7 @@ import pty
 import signal
 import struct
 import termios
+import time
 from pathlib import Path
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -230,6 +231,107 @@ def set_terminal_size(fd: int, rows: int, cols: int):
     fcntl.ioctl(fd, termios.TIOCSWINSZ, size)
 
 
+
+
+# Monitor local da SPIA: utiliza apenas interfaces do Linux (/proc).
+_monitor_previous = {"system": None, "process": None}
+
+
+def _read_cpu_counters():
+    with open("/proc/stat", encoding="ascii") as f:
+        fields = f.readline().split()
+    values = [int(v) for v in fields[1:]]
+    total = sum(values)
+    idle = values[3] + (values[4] if len(values) > 4 else 0)
+    return total, idle
+
+
+def _read_process_counters():
+    # Após o último ")" ficam os campos a partir do campo 3 de /proc/PID/stat.
+    raw = Path(f"/proc/{os.getpid()}/stat").read_text(encoding="ascii")
+    fields = raw[raw.rfind(")") + 2:].split()
+    cpu_ticks = int(fields[11]) + int(fields[12])  # utime + stime
+    rss_pages = max(0, int(fields[21]))            # RSS residente
+    page_size = os.sysconf("SC_PAGE_SIZE")
+    return cpu_ticks, rss_pages * page_size
+
+
+def _read_memory():
+    values = {}
+    with open("/proc/meminfo", encoding="ascii") as f:
+        for line in f:
+            key, value, *_ = line.replace(":", "").split()
+            if key in {"MemTotal", "MemAvailable"}:
+                values[key] = int(value) * 1024
+
+    total = values["MemTotal"]
+    available = values["MemAvailable"]
+    return {
+        "total_bytes": total,
+        "used_bytes": total - available,
+        "percent": round((total - available) * 100 / total, 1) if total else 0,
+    }
+
+
+@app.get("/api/monitor")
+async def resource_monitor():
+    """Retorna uso de CPU e RAM do sistema e deste processo servidor."""
+    try:
+        now = time.monotonic()
+        system_total, system_idle = _read_cpu_counters()
+        process_ticks, process_rss = _read_process_counters()
+        memory = _read_memory()
+
+        old_system = _monitor_previous["system"]
+        old_process = _monitor_previous["process"]
+
+        system_percent = None
+        process_percent = None
+
+        if old_system is not None:
+            delta_total = system_total - old_system[0]
+            delta_idle = system_idle - old_system[1]
+            if delta_total > 0:
+                system_percent = round(
+                    max(0, min(100, (delta_total - delta_idle) * 100 / delta_total)), 1
+                )
+
+        if old_process is not None:
+            delta_total = system_total - old_process[0]
+            delta_ticks = process_ticks - old_process[1]
+            if delta_total > 0:
+                process_percent = round(
+                    max(0, min(100, delta_ticks * 100 / delta_total)), 1
+                )
+
+        sample_seconds = (
+            round(now - old_system[2], 3)
+            if old_system is not None
+            else None
+        )
+
+        _monitor_previous["system"] = (system_total, system_idle, now)
+        _monitor_previous["process"] = (system_total, process_ticks, now)
+
+        return {
+            "ok": True,
+            "system": {"cpu_percent": system_percent, **memory},
+            "process": {
+                "cpu_percent": process_percent,
+                "cpu_basis": "percentual da capacidade total da máquina",
+                "ram_bytes": process_rss,
+                "pid": os.getpid(),
+            },
+            "sample_seconds": sample_seconds,
+            "timestamp": time.time(),
+        }
+    except (OSError, ValueError, IndexError, KeyError) as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Não foi possível ler métricas do sistema: {exc}",
+        )
+
+
 @app.websocket("/ws")
 async def terminal_socket(ws: WebSocket):
     await ws.accept()
@@ -240,7 +342,19 @@ async def terminal_socket(ws: WebSocket):
         os.chdir(PROJECT if PROJECT.exists() else HOME)
         env = os.environ.copy()
         env["TERM"] = "xterm-256color"
-        os.execvpe("bash", ["bash", "--login", "-i"], env)
+
+        os.execvpe(
+            "bash",
+            [
+                "bash",
+                "--noprofile",
+                "--norc",
+                "-i",
+                "-c",
+                'source "$HOME/miniforge3/etc/profile.d/conda.sh" && conda activate pta && export PS1="(pta) \\u@\\h:\\w\\$ " && exec bash --noprofile --norc -i',
+            ],
+            env,
+        )
 
     loop = asyncio.get_running_loop()
     set_terminal_size(fd, 24, 80)
