@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "descricao": "Memória persistente do Filhote; registrar somente fatos sustentados por fontes.",
+  "regras": [
+    "Distinguir fatos, hipóteses, interpretações e especulações.",
+    "Registrar a fonte de cada afirmação factual sempre que possível.",
+    "Não substituir resultados antigos silenciosamente.",
+    "Não tratar memória como evidência independente da fonte original."
+  ],
+  "itens": []
+}

@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Filhote — Laboratório</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #101722; color: #e8eef7;
+    font: 16px/1.6 system-ui, sans-serif;
+  }
+  main {
+    max-width: 900px; height: 100dvh; margin: auto;
+    display: flex; flex-direction: column; padding: 20px; gap: 14px;
+  }
+  header { border-bottom: 1px solid #354255; padding-bottom: 12px; }
+  h1 { margin: 0; font-size: 1.5rem; }
+  #status { color: #9fb0c6; font-size: .9rem; }
+  #chat {
+    flex: 1; min-height: 0; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 14px;
+    padding: 8px 3px;
+  }
+  .msg {
+    white-space: pre-wrap; overflow-wrap: anywhere;
+    padding: 14px 16px; border-radius: 12px;
+    border: 1px solid #354255;
+  }
+  .user { background: #20344d; }
+  .assistant { background: #192431; }
+  .error { color: #ffb4ab; }
+  form { display: flex; gap: 10px; }
+  textarea {
+    flex: 1; resize: vertical; min-height: 65px; max-height: 180px;
+    padding: 12px; border-radius: 10px; border: 1px solid #52647b;
+    background: #182231; color: white; font: inherit;
+  }
+  button {
+    padding: 10px 16px; border: 0; border-radius: 10px;
+    cursor: pointer; font: inherit; background: #8ac7ff; color: #102033;
+  }
+  button:disabled { opacity: .5; cursor: wait; }
+  .tools { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  #count { color: #9fb0c6; font-size: .85rem; }
+  @media (max-width: 600px) {
+    main { padding: 12px; }
+    form { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Filhote — Laboratório</h1>
+    <div id="status">Pronto para testar · API local da SPIA</div>
+  </header>
+
+  <section id="chat" aria-live="polite">
+    <div class="msg assistant">Olá! Esta é a interface de teste independente. Envie uma pergunta curta ou longa para comparar as respostas.</div>
+  </section>
+
+  <div class="tools">
+    <span id="count">0 caracteres na última resposta</span>
+    <button id="copy" type="button">Copiar última resposta</button>
+  </div>
+
+  <form id="form">
+    <textarea id="message" maxlength="4000" placeholder="Escreva sua pergunta..." required></textarea>
+    <button id="send" type="submit">Enviar</button>
+  </form>
+</main>
+
+<script>
+const chat = document.querySelector("#chat");
+const form = document.querySelector("#form");
+const input = document.querySelector("#message");
+const send = document.querySelector("#send");
+const status = document.querySelector("#status");
+const count = document.querySelector("#count");
+let lastAnswer = "";
+const history = [];
+
+function addMessage(role, text, isError = false) {
+  const node = document.createElement("div");
+  node.className = "msg " + role + (isError ? " error" : "");
+  node.textContent = text;
+  chat.appendChild(node);
+  chat.scrollTop = chat.scrollHeight;
+  return node;
+}
+
+function addSources(sources) {
+  if (!Array.isArray(sources) || sources.length === 0) return;
+
+  const section = document.createElement("div");
+  section.className = "sources";
+
+  const heading = document.createElement("strong");
+  heading.textContent = "Fontes locais consultadas";
+  section.appendChild(heading);
+
+  const list = document.createElement("ul");
+
+  for (const source of sources) {
+    if (!source || typeof source.path !== "string") continue;
+
+    const item = document.createElement("li");
+    const path = document.createElement("div");
+    path.textContent = source.path;
+    item.appendChild(path);
+
+    if (Array.isArray(source.matched_lines) &&
+        source.matched_lines.length > 0) {
+      const lines = document.createElement("div");
+      lines.textContent = "Linhas: " + source.matched_lines.join(", ");
+      item.appendChild(lines);
+    }
+
+    if (source.truncated === true) {
+      const note = document.createElement("div");
+      note.textContent = "Conteúdo truncado pelo limite de leitura.";
+      item.appendChild(note);
+    }
+
+    list.appendChild(item);
+  }
+
+  if (!list.childElementCount) return;
+  section.appendChild(list);
+  chat.appendChild(section);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const message = input.value.trim();
+  if (!message || send.disabled) return;
+
+  addMessage("user", message);
+  input.value = "";
+  send.disabled = true;
+  status.textContent = "Filhote está pensando...";
+  const pending = addMessage("assistant", "Aguardando resposta...");
+
+  try {
+    const response = await fetch("/api/filhote/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message, history: history.slice(-8) })
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.detail || `Erro HTTP ${response.status}`);
+    if (typeof data.answer !== "string") throw new Error("Resposta sem texto.");
+
+    lastAnswer = data.answer;
+    pending.textContent = lastAnswer;
+    addSources(data.sources);
+    history.push({ role: "user", content: message });
+    history.push({ role: "assistant", content: lastAnswer });
+    count.textContent = `${lastAnswer.length} caracteres na última resposta`;
+    const d = data.diagnostics || {};
+status.textContent =
+  `Modelo: ${data.model || "não informado"} · ` +
+  `Fim: ${d.finish_reason ?? "indisponível"} · ` +
+  `Tokens de saída: ${d.completion_tokens ?? "indisponível"}`;
+    chat.scrollTop = chat.scrollHeight;
+  } catch (error) {
+    pending.textContent = "Falha: " + error.message;
+    pending.classList.add("error");
+    status.textContent = "Não foi possível completar a solicitação.";
+  } finally {
+    send.disabled = false;
+    input.focus();
+  }
+});
+
+document.querySelector("#copy").addEventListener("click", async () => {
+  if (!lastAnswer) {
+    status.textContent = "Ainda não há resposta para copiar.";
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(lastAnswer);
+    status.textContent = "Última resposta copiada.";
+  } catch {
+    status.textContent = "Não foi possível copiar automaticamente.";
+  }
+});
+</script>
+</body>
+</html>

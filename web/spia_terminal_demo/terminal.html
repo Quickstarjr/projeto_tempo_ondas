@@ -535,6 +535,61 @@ main {
   flex: 1 1 auto;
 }
 
+#filhote-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+}
+.filhote-message {
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.filhote-message.user {
+  border-left: 3px solid var(--green);
+}
+.filhote-message.assistant {
+  border-left: 3px solid var(--muted);
+}
+#filhote-form {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 10px;
+  border-top: 1px solid var(--border);
+}
+#filhote-input {
+  box-sizing: border-box;
+  width: 100%;
+  resize: vertical;
+  padding: 8px;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font: inherit;
+}
+#filhote-send {
+  align-self: flex-end;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+#filhote-send:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+#filhote-status {
+  color: var(--muted);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+
 .side-subhead {
   padding: 9px 10px;
   color: var(--green);
@@ -841,11 +896,18 @@ main {
   </section>
 
   <section id="filhote-assistant" aria-label="Assistente Filhote">
-    <div class="side-subhead">🐶 FILHOTE</div>
-    <div class="side-placeholder">
-      Assistente científico da SPIA.<br>
-      Espaço reservado para a integração do assistente.
+    <div class="side-subhead">🐶 FILHOTE · NVIDIA</div>
+    <div id="filhote-messages" role="log" aria-live="polite"
+         aria-label="Conversa com Filhote">
+      <div class="filhote-message assistant">Olá! Sou o Filhote, assistente científico da SPIA. Vamos testar nossa conexão com a NVIDIA?</div>
     </div>
+    <form id="filhote-form">
+      <textarea id="filhote-input" rows="3" maxlength="4000"
+                placeholder="Escreva sua mensagem..." aria-label="Mensagem para Filhote"
+                required></textarea>
+      <button id="filhote-send" type="submit">Enviar</button>
+      <div id="filhote-status" role="status" aria-live="polite"></div>
+    </form>
   </section>
 </aside>
 <button id="filhote-toggle" type="button" aria-expanded="false"
@@ -1859,6 +1921,111 @@ function updateSpiaClock() {
 }
 updateSpiaClock();
 setInterval(updateSpiaClock, 1000);
+
+
+// Chat local do Filhote. A chave NVIDIA nunca chega ao navegador.
+(() => {
+  const form = document.querySelector('#filhote-form');
+  const input = document.querySelector('#filhote-input');
+  const send = document.querySelector('#filhote-send');
+  const messages = document.querySelector('#filhote-messages');
+  const status = document.querySelector('#filhote-status');
+  if (!form || !input || !send || !messages || !status) return;
+
+  const history = [];
+
+  function addMessage(role, content) {
+    const node = document.createElement('div');
+    node.className = `filhote-message ${role}`;
+    node.textContent = content;
+    messages.appendChild(node);
+    messages.scrollTop = messages.scrollHeight;
+    return node;
+  }
+
+  function addSources(sources) {
+    if (!Array.isArray(sources) || sources.length === 0) return;
+
+    const section = document.createElement('div');
+    section.className = 'filhote-sources';
+
+    const heading = document.createElement('strong');
+    heading.textContent = 'Fontes locais consultadas';
+    section.appendChild(heading);
+
+    const list = document.createElement('ul');
+
+    for (const source of sources) {
+      if (!source || typeof source.path !== 'string') continue;
+
+      const item = document.createElement('li');
+      const path = document.createElement('div');
+      path.textContent = source.path;
+      item.appendChild(path);
+
+      if (Array.isArray(source.matched_lines) &&
+          source.matched_lines.length > 0) {
+        const lines = document.createElement('div');
+        lines.textContent = 'Linhas: ' + source.matched_lines.join(', ');
+        item.appendChild(lines);
+      }
+
+      if (source.truncated === true) {
+        const note = document.createElement('div');
+        note.textContent = 'Conteúdo truncado pelo limite de leitura.';
+        item.appendChild(note);
+      }
+
+      list.appendChild(item);
+    }
+
+    if (!list.childElementCount) return;
+    section.appendChild(list);
+    messages.appendChild(section);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const message = input.value.trim();
+    if (!message || send.disabled) return;
+
+    addMessage('user', message);
+    input.value = '';
+    send.disabled = true;
+    status.textContent = 'Filhote está consultando a NVIDIA…';
+
+    try {
+      const response = await fetch('/api/filhote/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message, history: history.slice(-8) })
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.detail || `Falha HTTP ${response.status}`);
+      }
+      if (typeof data.answer !== 'string' || !data.answer.trim()) {
+        throw new Error('A resposta recebida estava vazia.');
+      }
+
+      addMessage('assistant', data.answer);
+      addSources(data.sources);
+      history.push(
+        { role: 'user', content: message },
+        { role: 'assistant', content: data.answer }
+      );
+      status.textContent = `Conectado · ${data.model || 'modelo NVIDIA'}`;
+    } catch (error) {
+      addMessage('assistant', `Não consegui responder: ${error.message}`);
+      status.textContent = 'Verifique a conexão e os logs do servidor.';
+    } finally {
+      send.disabled = false;
+      input.focus();
+    }
+  });
+})();
 
 </script>
 </body>

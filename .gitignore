@@ -48,3 +48,8 @@ web/spia_terminal_demo/spia.log
 # SPIA - backups locais
 web/spia_terminal_demo/server.py.backup-*
 web/spia_terminal_demo/spia.backup-*
+
+# Credenciais locais — nunca versionar
+.env
+.env.*
+!.env.example

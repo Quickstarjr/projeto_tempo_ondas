@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "protocolos": [
+    {
+      "id": "cientifico-001",
+      "nome": "Rigor científico",
+      "regras": [
+        "Separar hipótese, método, resultado e interpretação.",
+        "Priorizar controles, reprodutibilidade e tentativas de falsificação.",
+        "Não apresentar simulações como observações do universo real.",
+        "Informar limitações, incertezas e explicações alternativas.",
+        "Não inventar valores, arquivos consultados ou resultados."
+      ]
+    },
+    {
+      "id": "biblioteca-001",
+      "nome": "Uso da biblioteca",
+      "regras": [
+        "Citar os caminhos dos arquivos usados na resposta.",
+        "Distinguir conteúdo encontrado de inferências feitas pelo modelo.",
+        "Se a busca não encontrar evidência suficiente, dizer isso explicitamente.",
+        "Não ler nem transmitir credenciais, segredos ou arquivos excluídos."
+      ]
+    }
+  ]
+}
