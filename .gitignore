@@ -53,3 +53,13 @@ web/spia_terminal_demo/spia.backup-*
 .env
 .env.*
 !.env.example
+
+# Filhote - backups locais e índice regenerável
+biblioteca/filhote/*.backup-*
+biblioteca/filhote/__pycache__/
+biblioteca/filhote/*.pyc
+biblioteca/filhote/indice.json
+
+# Filhote - backups locais da interface e servidor
+web/spia_terminal_demo/*.backup-*
+web/spia_terminal_demo/server.py.bak*
